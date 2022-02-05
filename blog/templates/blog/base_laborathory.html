@@ -1,0 +1,62 @@
+{% extends "blog/base.html" %}
+{% load static %}
+{% block dop-menu %}
+<style>
+.loader_lab2  {
+	z-index: 10;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	margin-left: -60px;
+    margin-top:-60px;
+	display: none;
+}
+
+div.enabled {
+    display: block;
+	border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+	opacity: 1;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#load_lab2{
+	position: fixed;
+	z-index: 9;
+	bgcolor: white;
+	background-size: cover;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 1;
+}
+</style>
+<div id="load_lab2" style="display:none"></div>
+<div class="loader_lab2"></div>
+<nav class = "bot-menu">
+<ul class="menu-dop">
+	<li><a href="/laborathory/1/">1. Задание1 </a></li>
+	<li><a id="tap_lab2" href="/laborathory/2/">2. Задание2 </a></li>
+	<li><a href="/laborathory/3/">3. Задание3 </a></li>
+	<li><a href="/laborathory/4/">4. Задание4 </a></li>
+</nav>
+<script>
+		const tap_lab2 = document.querySelector('#tap_lab2')
+		
+		tap_lab2.addEventListener('click', () => {
+			const loader_lab2 = document.querySelector('.loader_lab2')
+			loader_lab2.classList.add('enabled')
+			var e = document.getElementById('load_lab2');
+			e.style.display = (e.style.display == 'block') ? 'none' : 'block';
+		})
+	</script>
+{% endblock dop-menu %}
+{% block content %}
+{% endblock content %}

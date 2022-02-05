@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% extends "blog/base_theory.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static "css/button.css" %}" />
+<div id="u3870-30">
+<p id="u3870-311">{{tema}}</p>
+{% for i in lines %}
+	{% if i == lines.1 %}
+		<img id="u3870-20" src="{% static "images/classification.png" %}" alt="classification"/>
+	{% elif i == lines.2 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.9 %}
+		<div id="u3870-90"><img src="{% static "images/formula_filter.png" %}" alt="formula_filter"/></div>
+	{% elif i == lines.13 %}
+		<img id="u3870-20" src="{% static "images/impuls.png" %}" alt="impuls"/>
+	{% elif i == lines.14 %}
+		<p id="u3870-32">{{ i }}</p>
+    {% elif i == lines.19 %}
+		<img id="u3870-20" src="{% static "images/impuls_sogl.png" %}" alt="impuls_sogl"/>
+	{% elif i == lines.20 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.25 %}
+		<div id="u3870-90"><img src="{% static "images/formula_correl.png" %}" alt="formula_correl"/></div>
+	{% elif i == lines.29 %}
+		<img id="u3870-20" src="{% static "images/correl_priem.png" %}" alt="correl_priem"/>
+	{% elif i == lines.30 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.36 %}
+		<img id="u3870-20" src="{% static "images/sravn_vih.png" %}" alt="sravn_vih"/>
+	{% elif i == lines.37 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.40 %}
+		<img id="u3870-20" src="{% static "images/obl_resh.png" %}" alt="obl_resh"/>
+	{% elif i == lines.41 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.46 %}
+		<img id="u3870-20" src="{% static "images/QAM_dem.png" %}" alt="QAM_dem"/>
+	{% elif i == lines.47 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.53 %}
+		<img id="u3870-20" src="{% static "images/OFDM_dem.png" %}" alt="OFDM_dem"/>
+	{% elif i == lines.54 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% elif i == lines.61 %}
+		<img id="u3870-20" src="{% static "images/amp_det.png" %}" alt="amp_det"/>
+	{% elif i == lines.62 %}
+		<p id="u3870-32">{{ i }}</p>
+	{% else %}
+		<p id="u3870-33">{{ i }}</p>
+	{% endif %}
+{% endfor %}
+	<a href="#"><input class = "button1" type="button" value="Наверх" id="button1" /></a>
+</div>
+{% endblock content %}

@@ -1,0 +1,9 @@
+﻿*.pyc
+*~
+__pycache__
+venv
+.DS_Store
+db.sqlite3
+Доступ к админу.txt
+Информация.txt
+keys
