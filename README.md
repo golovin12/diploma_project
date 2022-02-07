@@ -2,4 +2,5 @@
 Первый опыт работы с Django, html, css
 ## Используемые библиотеки:
 Django, numpy, matplotlib, numba, commpy
+## Внешний вид сайта:
 ![Alt text](/detect.png?raw=true "Внешний вид сайта")
