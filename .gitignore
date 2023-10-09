@@ -2,6 +2,7 @@
 *~
 __pycache__
 venv
+.idea
 .DS_Store
 db.sqlite3
 Доступ к админу.txt
