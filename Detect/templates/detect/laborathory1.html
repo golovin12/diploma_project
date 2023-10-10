@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+{% extends "detect/base_laborathory.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static "css/button.css" %}"/>
+<style>
+#ssilka {
+    color: red; /* Цвет обычной ссылки */ 
+    text-decoration: none; /* Убираем подчеркивание у ссылок */
+	font-weight: bold;
+   }
+#ssilka:hover {
+    color: Darkred; /* Цвет ссылки при наведении на нее курсора мыши */  
+    text-decoration: underline; /* Добавляем подчеркивание */
+	font-weight: bold;
+   }
+</style>
+<form method="POST">
+    {% csrf_token %}
+	<div id="u3870-30">
+		<p id="u3870-311">Практическое задание 1</p>
+		<p id="u3870-311">"Изучение влияния SNR на качество детектирования"</p>
+		<input type="hidden" name="Modulation" value="{{t_modulat}}{{modulat}}"/>
+		<p id="u3870-311">Выбранный тип модуляции: {{t_modulat}}-{{modulat}}</p>
+		<p>Исходное сообщение, которое будет передаваться по каналу связи: {{msg}}</p>
+		<p>Это сообщение поступает на передающее устройство.</p>
+		<p>Внешний вид сообщения после манипуляции {{t_modulat}}-{{modulat}} представлен на рисунке 1.</p>
+		<img src="/static/lab1/{{f1}}.png" alt="{{f1}}"/>
+		<p id="u3000-40">Рисунок 1 - Внешний вид сообщения после манипуляции {{t_modulat}}-{{modulat}}</p>
+		<p>Далее этот сигнал передается по каналу связи. В процессе передачи к сигналу добавляются шумы (отношение Сигнал/Шум SNR={{snr}} дБ). На приёмном устройстве, сигнал, после прохождения через принимающий фильтр, примет вид, изображенный на рисунке 2.</p>
+		<img src="/static/lab1/{{f2}}.png" alt="{{f2}}"/>
+		<p id="u3000-40">Рисунок 2 - Внешний вид сообщения после манипуляции {{t_modulat}}-{{modulat}} при SNR={{snr}} дБ</p>
+		<p><a id="ssilka" href="##" onclick="javascript:showhide('OBL')">Сигнальное созвездие, по которому определяется выходное сообщение, для данного типа манипуляции представлено на рисунке 3: (нажмите, чтобы посмотреть)</a></p>
+		<div id="OBL" style="display:none">
+			<img src="/static/graph/{{t_modulat}}{{modulat}}.png" alt="{{t_modulat}}{{modulat}}"/>
+			<p id="u3000-40">Рисунок 3 - Сигнальное созвездие для {{t_modulat}}-{{modulat}} манипуляции</p>
+		</div>
+		<p>После этапа преобразования сигнала в выборку, происходит процесс детектирования. Сообщение, полученное после детектирования:</p>
+		<p>{{demodulated}}</p>
+		<p>Для сравнения - исходное сообщение:</p>
+		<p>{{msg}}</p>
+		<center><div id="u3000-50">
+			<p style="text-indent: 0;">{{itog}}</p>
+		</div></center>
+		{% if c == "0" %}
+			<p>Нажмите на кнопку ниже, чтобы перейти к выполнению следующего задания.</p>
+			<a id="ssilka" href="/laborathory/1/"><input type="button" class = "button1" value="К заданию"/></a>
+		{% else %}
+			<p>Как видно из рассуждений выше SNR = {{snr}} дБ не подходит для выполнения условий при {{t_modulat}}-{{modulat}} манипуляции. Рассчитайте какое должно быть SNR (формулы для расчёта есть на первой странице задания 1), чтобы получить вероятность ошибки 0.5% и подставьте в окошко ниже.</p>
+			<p><a id="ssilka" href="##" onclick="javascript:showhide('formuls')">Формула для расчёта вероятности ошибок (нажмите, чтобы посмотреть)</a></p>
+			<div id="formuls" style="display:none">
+			{% if modulat == "PSK" %}
+				<div id="u3870-90"><img src="{% static "images/formula_MPSK.png" %}" alt="MPSK"/></div>
+			{% else %}
+				<div id="u3870-90"><img src="{% static "images/formula_MQAM.png" %}" alt="MQAM"/></div>
+			{% endif %}
+			</div>
+			<p>Выберите, какое отношение Сигнал/Шум вы хотите сделать: <input placeholder="Пр: 12.5" autocomplete="off" required type="number" name="snr" min="2" max="100" step="0.1"/>дБ</p>
+			<p><input type="submit" class = "button1" value="Проверить"/></p>
+		{% endif %}
+		
+	</div>
+</form>
+<script type="text/javascript">
+    function showhide(id) {
+        var e = document.getElementById(id);
+        e.style.display = (e.style.display == 'block') ? 'none' : 'block';
+     }
+</script>
+{% endblock content %}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+{% extends "detect/base_laborathory.html" %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static "css/button.css" %}"/>
+<form method="POST">
+    {% csrf_token %}
+	<div id="u3000-30" style="display:block">
+		<p id="u3870-311">Практическое задание 2(пример выполнения)</p>
+		<p id="u3870-311">"Детектирование сигналов, используя сигнальное созвездие"</p>
+		<center><div id="u3000-50">
+			<p>В данной работе Вам надо будет выступить в роли детектора и определить, какой сигнал будет на выходе.</p>
+		</div><center>
+		<p>Пример выполнения задания: </p>
+		<p>Дан сигнал, который после воздействия шума и прохождения через принимающий фильтр выглядит как показано на рисунке 1.</p>
+		<img src="/static/lab2/{{vih_put.0}}.png" alt="{{vih_put.0}}"/>
+		<p id="u3870-32">Рисунок 1 - Внешний вид сигнала</p>
+		<p>Данный сигнал на сигнальном созвездии выглядит, как показано на рисунке 2</p>
+		<input type="hidden" name="prov3" value="{{d.3}}"/>
+		<img src="/static/lab2/{{put_sozv.0.0}}sozvezd.png" alt="{{put_sozv.0.0}}sozvezd"/>
+		<p id="u3870-32">Рисунок 2 - Сигнальное созвездие</p>
+		<div id="u3000-50" align="left">
+			<p>Процесс детектирования:</p>
+			<p>1) Определяем цвет первого символа сигнала. На рисунке с сигналом видно, что первый символ выделен синим цветом.</p>
+			<p>2) Ищем на сигнальном созвездии синюю точку.</p>
+			<p>3) Определяем, в какой области решений находится синяя точка. Как видно, синяя точка находится ближе к [0], значит первым символом сообщения является "0".</p>
+			<p>4) Смотрим цвет второго символа</p>
+			<p>5) Определяем, что вторым символом является "1"</p>
+			<p>6) Определяем, какому значению соответствуют остальные символы сигнала.</p>
+			<p>После детектирования всех символов получилось сообщение: </p>
+			<input type="hidden" name="prov1" value="{{d.1}}"/>
+			<p style="background-color: white;">{{d.0}}</p>
+		</div>
+		<p><a href="#"><input type="button" class="button1" value="Перейти к практике" onclick="javascript:showhide('u3000-30', 'u3000-31')"/></a></p>
+	</div>
+	<div id="u3000-31" style="display:none">
+		<p id="u3870-311">Практическое задание 2</p>
+		<input type="hidden" name="prov2" value="{{d.2}}"/>
+		<p id="u3870-311">"Детектирование сигналов, используя сигнальное созвездие"</p>
+		<center><div id="u3000-50">
+			<p>В данной работе Вам надо будет выступить в роли детектора и определить, какой сигнал будет на выходе.</p>
+			<p>Демодулируйте каждый из 3 сигналов. Полученный демодулированный сигнал необходимо записывать в поле для ввода. Учтите, что записывать ответ необходимо без пробелов и других посторонних символов!</p>
+		</div><center>
+		<p>1) Сигнал 1 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
+		<img src="/static/lab2/{{vih_put.1}}.png" alt="{{vih_put.1}}"/>
+		<p id="u3870-32">Рисунок 1 - Внешний вид сигнала 1</p>
+		<img src="/static/lab2/{{put_sozv.1.0}}sozvezd.png" alt="{{put_sozv.1.0}}sozvezd"/>
+		<p id="u3870-32">Рисунок 2 - Сигнальное созвездие для сигнала 1</p>
+		<p>Введите значения сигнала 1: <input autocomplete="off" required name="otv1" type="text" size="40" placeholder="Пример ввода: 01101000110101"/></p>
+		<p>2) Сигнал 2 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
+		<img src="/static/lab2/{{vih_put.2}}.png" alt="{{vih_put.2}}"/>
+		<p id="u3870-32">Рисунок 3 - Внешний вид сигнала 2</p>
+		<img src="/static/lab2/{{put_sozv.2.0}}sozvezd.png" alt="{{put_sozv.2.0}}sozvezd"/>
+		<p id="u3870-32">Рисунок 4 - Сигнальное созвездие для сигнала 2</p>
+		<p>Введите значения сигнала 2: <input autocomplete="off" required name="otv2" type="text" size="40" placeholder="Пример ввода: 01101000110101"/></p>
+		<p>3) Сигнал 3 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
+		<img src="/static/lab2/{{vih_put.3}}.png" alt="{{vih_put.3}}"/>
+		<p id="u3870-32">Рисунок 5 - Внешний вид сигнала 3</p>
+		<img src="/static/lab2/{{put_sozv.3.0}}sozvezd.png" alt="{{put_sozv.3.0}}sozvezd"/>
+		<p id="u3870-32">Рисунок 6 - Сигнальное созвездие для сигнала 3</p>
+		<p>Введите значения сигнала 3: <input autocomplete="off" required name="otv3" type="text" size="40" placeholder="Пример ввода: 01101000110101"/></p>
+		<p>После того, как Вы детектируете все 3 сигнала, нажмите кнопку "Проверить".</p>
+		<p><input type="submit" class = "button1" value="Проверить"/></p>
+		<p>Вы можете посмотреть пример выполнения задания, нажав на кнопку ниже (все введенные значения сохранятся).</p>
+		<p><input type="button" class = "button2" value="Показать пример" onclick="javascript:showhide('u3000-30', 'u3000-31')"/></p>
+	</div>
+</form>
+<script type="text/javascript">
+    function showhide(id, id2) {
+        var e = document.getElementById(id);
+        e.style.display = (e.style.display == 'block') ? 'none' : 'block';
+		var g = document.getElementById(id2);
+        g.style.display = (g.style.display == 'block') ? 'none' : 'block';
+     }
+</script>
+{% endblock content %}

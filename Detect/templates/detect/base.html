@@ -1,0 +1,17 @@
+{% extends "diploma/base.html" %}
+{% block menu %}
+    {{ block.super }}
+    {% block dop-menu %}{% endblock dop-menu %}
+{% endblock %}
+
+{% block menu_pages %}
+    <li><a href="{% url 'detect:home' %}">Главная</a></li>
+    <li><a href="/theory/1/">Теория</a></li>
+    <li><a href="/laborathory/1/">Практические задания</a></li>
+    <li><a href="/test/">Тестирование</a></li>
+{% endblock %}
+
+{% block footer %}
+    <a style="float: right; padding: 10px" href="/result_is_db/"></a>
+    {{ block.super }}
+{% endblock %}

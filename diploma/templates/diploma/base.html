@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="{% static "diploma/css/menu.css" %}"/>
+    <link rel="stylesheet" href="{% static "diploma/css/index.css" %}" id="pagesheet"/>
+    <link rel="shortcut icon" href="{% static "diploma/images/favicon.ico" %}" type="image/x-icon"/>
+    <title>{% block title %}Детектирование сигналов{% endblock title %}</title>
+</head>
+<body>
+<style>
+    body {
+        background: url('{% static "diploma/images/fon.png" %}') no-repeat center center fixed;
+        background-size: cover;
+        min-width: 750px;
+    }
+</style>
+{% block menu %}
+    <nav class="top-menu">
+        <a class="navbar-logo" href="/"><img src="{% static "diploma/images/logo_uisi.png" %}"></a>
+        <ul class="menu-main">
+            {% block menu_pages %}{% endblock menu_pages %}
+        </ul>
+    </nav>
+{% endblock menu %}
+<div id="u3100-10">
+    {% block content %}
+    {% endblock content %}
+    {% block footer %}
+        <div id="u3900-30">
+            <p style="text-align: justify; text-indent: 30px; margin: 10px;">
+                Сайт для изучения тории о Детектировании сигналов и выполнению лабораторной работы. Город Екатеринбург 2021г.
+            </p>
+        </div>
+    {% endblock footer %}
+</div>
+</body>
+</html>
