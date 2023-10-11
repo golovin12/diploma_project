@@ -1,15 +1,13 @@
 {% extends "detect/base.html" %}
-{% load static %}
-
 {% block content %}
-<div id="u2000-30">
-<p id="u2000-311">{{zagolovok}}</p>
-{% for i in lines %}
-	{% if i == '0' %}
-		<br>
-	{% else %}
-		<p id="u2000-33">{{ i }}</p>
-	{% endif %}
-{% endfor %}
-</div>
+    <div id="u2000-30">
+        <p id="u2000-311">{{ header }}</p>
+        {% for line in text %}
+            {% if line == '0\n' %}
+                <br>
+            {% else %}
+                <p id="u2000-33">{{ line }}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
 {% endblock content %}

@@ -3,6 +3,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
+from django.views.decorators.http import require_GET
 from scipy.fft import fft, ifft
 
 from django.core.handlers.wsgi import WSGIRequest
@@ -26,26 +27,22 @@ file_lab4 = []
 file_sozvezd2 = []
 
 
+@require_GET
 def home_page(request: WSGIRequest):
     """Главная страница"""
     with open('theory/glavn.txt', 'r', encoding='UTF-8') as f:
-        lines = f.readlines()
-    glavn = []
-    for i in lines:
-        glavn.append(i[:-1])
-    data = {"zagolovok": "Лабораторная работа на тему 'Детектирование сигналов в современных системах связи'",
-            "lines": glavn
-            }
+        text = f.readlines()
+    data = {"header": "Лабораторная работа на тему 'Детектирование сигналов в современных системах связи'",
+            "text": text}
     return render(request, 'detect/home.html', context=data)
 
 
-# Выводит теорию из файла
+@require_GET
 def theory1(request):
     with open('theory/theory1.txt', 'r', encoding='UTF-8') as f:
-        lines = f.readlines()
+        text = f.readlines()
     data = {"tema": "1. Общие сведения о задаче детектирования",
-            "lines": lines
-            }
+            "lines": text}
     return render(request, 'detect/theory1.html', context=data)
 
 
