@@ -168,7 +168,7 @@
                     <p style="text-align: center; text-indent: 0;">
                         <strong>Выберите тип манипуляции, который будет использоваться.</strong>
                     </p>
-                    <p style="text-align: center; text-indent: 0;">
+                    <div style="text-align: center; text-indent: 0;">
                         <select required size="1" name="Modulation">
                             <option value="2PSK">2-PSK (Фазовая манипуляция)</option>
                             <option value="4PSK">4-PSK (Фазовая манипуляция)</option>
@@ -180,8 +180,10 @@
                             <option value="64QAM">64-QAM (Квадратурно-амплитудная манипуляция)</option>
                             <option value="256QAM">256-QAM (Квадратурно-амплитудная манипуляция)</option>
                         </select>
-                    </p>
-                    <input class="button1" type="submit" onclick="showLoader()" value="Перейти к практике"/>
+                        <button class="button" type="submit" style="margin-top: 1em" onclick="showLoader()">
+                            Перейти к практике
+                        </button>
+                    </div>
                     <input type="hidden" name="snr" value="7"/>
                 </div>
             </div>

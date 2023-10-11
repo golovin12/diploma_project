@@ -1,58 +1,61 @@
-<!DOCTYPE html>
 {% extends "detect/base.html" %}
 {% load static %}
-{% block content %}
 
-<body>
-<link rel="stylesheet" href="{% static "css/button.css" %}"/>
-<div id="u3700-10" class="rewrite test">
-					<center><p id="u3700-25">{{len_DB}}{{zagolovok}}</p><br>
-                    <form method="POST">
-					{% csrf_token %}
-					<input type="hidden" name="id" value="{{id}}"/>
-					<div id="u3700-50">
-						<table>
-							<center><b>{{result}}</b></center>
-							{{ form }}
-						</table>
-					</div>
-					{% for i in voprosi %}
-						{% if i.6 == '0' %}
-							<div id="u3700-30"><b>{{i.5}}. {{i.0}}</b><br>
-								<input class="test_text" required type="radio" id="{{i.5}}{{i.1}}" name="{{i.5}}" value="{{i.1}}"/>
-								<label for="{{i.5}}{{i.1}}">{{i.1}}</label>
-								
-								<br><input class="test_text" required type="radio" id="{{i.5}}{{i.2}}" name="{{i.5}}" value="{{i.2}}"/>
-								<label for="{{i.5}}{{i.2}}">{{i.2}}</label>
-								
-								<br><input class="test_text" required type="radio" id="{{i.5}}{{i.3}}" name="{{i.5}}" value="{{i.3}}"/>
-								<label for="{{i.5}}{{i.3}}">{{i.3}}</label>
-								
-								<br><input class="test_text" required type="radio" id="{{i.5}}{{i.4}}" name="{{i.5}}" value="{{i.4}}"/>
-								<label for="{{i.5}}{{i.4}}">{{i.4}}</label>
-							</div>
-						{% else %}
-							<div id="u3700-30"><b>{{i.5}}. {{i.0}}</b><br>
-									<img id="u3000-80" src={{i.6}} alt="{{i.6}}"/><br>
-									<input class="test_text" required type="radio" id="{{i.5}}{{i.1}}" name="{{i.5}}" value="{{i.1}}"/>
-									<label for="{{i.5}}{{i.1}}">{{i.1}}</label>
-									
-									<br><input class="test_text" required type="radio" id="{{i.5}}{{i.2}}" name="{{i.5}}" value="{{i.2}}"/>
-									<label for="{{i.5}}{{i.2}}">{{i.2}}</label>
-									
-									<br><input class="test_text" required type="radio" id="{{i.5}}{{i.3}}" name="{{i.5}}" value="{{i.3}}"/>
-									<label for="{{i.5}}{{i.3}}">{{i.3}}</label>
-									
-									<br><input class="test_text" required type="radio" id="{{i.5}}{{i.4}}" name="{{i.5}}" value="{{i.4}}"/>
-									<label for="{{i.5}}{{i.4}}">{{i.4}}</label>
-								</div>
-						{% endif %}
-					{% endfor %}
-                        <br><br><br>
-                        <p><input name="test_button" type="submit" class = "button1" value="Проверить"/></p>
-                    </form>
-					</center>
-					
-</div>
-</body>
-{% endblock content %}
+{% block content %}
+    <div class="card-info-bold">{{ len_DB }}{{ zagolovok }}</div>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ id }}"/>
+        <div class="card-interaction">
+            <table>
+                <div class="text-center"><b>{{ result }}</b></div>
+                {{ form }}
+            </table>
+        </div>
+        {% for i in voprosi %}
+            {% if i.6 == '0' %}
+                <div class="card-info size120"><b>{{ i.5 }}. {{ i.0 }}</b><br>
+                    <input class="test_text" required type="radio" id="{{ i.5 }}{{ i.1 }}" name="{{ i.5 }}"
+                           value="{{ i.1 }}"/>
+                    <label for="{{ i.5 }}{{ i.1 }}">{{ i.1 }}</label>
+
+                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.2 }}" name="{{ i.5 }}"
+                               value="{{ i.2 }}"/>
+                    <label for="{{ i.5 }}{{ i.2 }}">{{ i.2 }}</label>
+
+                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.3 }}" name="{{ i.5 }}"
+                               value="{{ i.3 }}"/>
+                    <label for="{{ i.5 }}{{ i.3 }}">{{ i.3 }}</label>
+
+                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.4 }}" name="{{ i.5 }}"
+                               value="{{ i.4 }}"/>
+                    <label for="{{ i.5 }}{{ i.4 }}">{{ i.4 }}</label>
+                </div>
+            {% else %}
+                <div class="card-info size120"><b>{{ i.5 }}. {{ i.0 }}</b><br>
+                    <img id="u3000-80" src={{ i.6 }} alt="{{ i.6 }}"/><br>
+                    <input class="test_text" required type="radio" id="{{ i.5 }}{{ i.1 }}" name="{{ i.5 }}"
+                           value="{{ i.1 }}"/>
+                    <label for="{{ i.5 }}{{ i.1 }}">{{ i.1 }}</label>
+
+                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.2 }}" name="{{ i.5 }}"
+                               value="{{ i.2 }}"/>
+                    <label for="{{ i.5 }}{{ i.2 }}">{{ i.2 }}</label>
+
+                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.3 }}" name="{{ i.5 }}"
+                               value="{{ i.3 }}"/>
+                    <label for="{{ i.5 }}{{ i.3 }}">{{ i.3 }}</label>
+
+                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.4 }}" name="{{ i.5 }}"
+                               value="{{ i.4 }}"/>
+                    <label for="{{ i.5 }}{{ i.4 }}">{{ i.4 }}</label>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <div class="text-center" style="margin: 0 1em 1em 1em">
+            <button name="test_button" style="width: 50%; padding: 10px 0;" type="submit" class="button">
+                Проверить
+            </button>
+        </div>
+    </form>
+{% endblock %}

@@ -3,7 +3,7 @@ import warnings
 
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_http_methods
 from scipy.fft import fft, ifft
 
 from django.core.handlers.wsgi import WSGIRequest
@@ -14,7 +14,7 @@ from django.views.decorators.cache import never_cache
 from modulation_script import QAMModem, PSKModem
 from .forms import UserForm
 from .models import Student
-from .utils import convert_base, znach, for_test, graf, for_percent, for_lab1, for_lab2, sozvezd
+from .utils import convert_base, for_test, graf, for_percent, for_lab1, for_lab2, sozvezd
 
 warnings.filterwarnings('ignore')
 
@@ -25,6 +25,16 @@ file_lab1 = []
 file_lab2 = []
 file_lab4 = []
 file_sozvezd2 = []
+
+
+def znach(voprosi, otveti):
+    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
+    global otveti_slovar
+    t = random.randint(-99999999, 99999999)
+    while otveti_slovar.get(str(t)) != None:
+        t = random.randint(-99999999, 99999999)
+    otveti_slovar[str(t)] = [voprosi, otveti]
+    return str(t)
 
 
 @require_GET
@@ -327,8 +337,10 @@ def laborathory4(request):
         return render(request, 'detect/laborathory4.html', context={"put": put, "signal": signal, "vihod": vihod})
 
 
+@require_GET
 @never_cache
 def result_is_db(request: WSGIRequest):
+    """Возвращает информацию о статусе выполнения заданий студентами"""
     page_number = request.GET.get('page')
     students = Student.objects.all()
     paginator = Paginator(students, 50)
@@ -342,9 +354,10 @@ def result_is_db(request: WSGIRequest):
     return render(request, 'detect/result_is_db.html', context={"spisok": students_results})
 
 
-# Выводит Тестовые вопросы, просит пользователя авторизоваться и, при успешном выполнении теста, выводит результат.
+@require_http_methods(["GET", "POST"])
 @never_cache
 def tests(request):
+    # Выводит Тестовые вопросы, просит пользователя авторизоваться и, при успешном выполнении теста, выводит результат.
     global otveti_for_users
     c = 0
     userform = UserForm()  # Создаются поля для ввода Имени, Фамилии и Группы

@@ -22,14 +22,6 @@ def convert_base(num, to_base=2, from_base=2):
 
 
 # ФУНКЦИИ ДЛЯ ТЕСТА
-# Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
-def znach(voprosi, otveti):
-    global otveti_slovar
-    t = random.randint(-99999999, 99999999)
-    while otveti_slovar.get(str(t)) != None:
-        t = random.randint(-99999999, 99999999)
-    otveti_slovar[str(t)] = [voprosi, otveti]
-    return str(t)
 
 
 # Функция принимает список вопросов с ответами, перемешивает вопросы
