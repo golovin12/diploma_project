@@ -1,17 +1,13 @@
 {% extends "diploma/base.html" %}
-{% block menu %}
-    {{ block.super }}
-    {% block dop-menu %}{% endblock dop-menu %}
+{% load static %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static "detect/css/button.css" %}"/>
 {% endblock %}
 
-{% block menu_pages %}
+{% block navbar-links %}
     <li><a href="{% url 'detect:home' %}">Главная</a></li>
-    <li><a href="/theory/1/">Теория</a></li>
-    <li><a href="/laborathory/1/">Практические задания</a></li>
-    <li><a href="/test/">Тестирование</a></li>
-{% endblock %}
-
-{% block footer %}
-    <a style="float: right; padding: 10px" href="/result_is_db/"></a>
-    {{ block.super }}
+    <li><a href="{% url 'detect:theory_list' %}">Теория</a></li>
+    <li><a href="{% url 'detect:laboratory_list' %}">Практические задания</a></li>
+    <li><a href="{% url 'detect:test' %}">Тестирование</a></li>
 {% endblock %}

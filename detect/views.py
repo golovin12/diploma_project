@@ -30,8 +30,8 @@ file_sozvezd2 = []
 @require_GET
 def home_page(request: WSGIRequest):
     """Главная страница"""
-    with open('theory/glavn.txt', 'r', encoding='UTF-8') as f:
-        text = f.readlines()
+    with open('theory/glavn.txt', 'r', encoding='utf-8') as file:
+        text = file.read()
     data = {"header": "Лабораторная работа на тему 'Детектирование сигналов в современных системах связи'",
             "text": text}
     return render(request, 'detect/home.html', context=data)
@@ -41,8 +41,8 @@ def home_page(request: WSGIRequest):
 def theory1(request):
     with open('theory/theory1.txt', 'r', encoding='UTF-8') as f:
         text = f.readlines()
-    data = {"tema": "1. Общие сведения о задаче детектирования",
-            "lines": text}
+    data = {"header": "1. Общие сведения о задаче детектирования",
+            "text": text}
     return render(request, 'detect/theory1.html', context=data)
 
 
