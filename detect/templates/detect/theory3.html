@@ -1,47 +1,49 @@
-<!DOCTYPE html>
 {% extends "detect/base_theory.html" %}
 {% load static %}
 {% block content %}
-<link rel="stylesheet" href="{% static "css/button.css" %}" />
-<div id="u3870-30">
-<p id="u3870-311">{{tema}}</p>
-{% for i in lines %}
-	{% if i == lines.5 %}
-		<img id="u3870-20" src="{% static "images/ris1.png" %}" alt="ris1"/>
-	{% elif i == lines.6 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.7 %}
-		<img id="u3870-20" src="{% static "images/ris2.png" %}" alt="ris2"/>
-	{% elif i == lines.8 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.11 %}
-		<img id="u3870-20" src="{% static "images/ris3.png" %}" alt="ris3"/>
-	{% elif i == lines.12 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.13 %}
-		<img id="u3870-20" src="{% static "images/ris4.png" %}" alt="ris4"/>
-	{% elif i == lines.14 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.23 %}
-		<img id="u3870-20" src="{% static "images/ris5.png" %}" alt="ris5"/>
-	{% elif i == lines.24 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.27 %}
-		<img id="u3870-20" src="{% static "images/ris6.png" %}" alt="ris6"/>
-	{% elif i == lines.28 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.32 %}
-		<img id="u3870-20" src="{% static "images/ris7.png" %}" alt="ris7"/>
-	{% elif i == lines.33 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% elif i == lines.41 %}
-		<img id="u3870-20" src="{% static "images/ris8.png" %}" alt="ris8"/>
-	{% elif i == lines.42 %}
-		<p id="u3870-32">{{ i }}</p>
-	{% else %}
-		<p id="u3870-33">{{ i }}</p>
-	{% endif %}
-{% endfor %}
-	<a href="#"><input class = "button1" type="button" value="Наверх" id="button1" /></a>
-</div>
+    <div class="card">
+        <div class="card-header">{{ header }}</div>
+        <div class="card-body">
+            {% for line in text %}
+                {% if line == text.5 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris1.png" %}" alt="ris1"/>
+                {% elif line == text.6 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.7 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris2.png" %}" alt="ris2"/>
+                {% elif line == text.8 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.11 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris3.png" %}" alt="ris3"/>
+                {% elif line == text.12 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.13 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris4.png" %}" alt="ris4"/>
+                {% elif line == text.14 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.23 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris5.png" %}" alt="ris5"/>
+                {% elif line == text.24 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.27 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris6.png" %}" alt="ris6"/>
+                {% elif line == text.28 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.32 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris7.png" %}" alt="ris7"/>
+                {% elif line == text.33 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% elif line == text.41 %}
+                    <img class="bordered-image" src="{% static "detect/images/ris8.png" %}" alt="ris8"/>
+                {% elif line == text.42 %}
+                    <p class="image-caption">{{ line }}</p>
+                {% else %}
+                    <p class="text-indent">{{ line }}</p>
+                {% endif %}
+            {% endfor %}
+            <div class="text-center">
+                <a href="#"><input class="button1" type="button" value="Наверх" id="button1"/></a>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

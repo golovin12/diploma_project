@@ -11,8 +11,23 @@ def paragraph_format(paragraph: str) -> str:
     lines = paragraph.split("\n")
     result = []
     for line in lines:
+        if line.startswith('##bordered-image:'):
+            # todo изображения в рамке
+            continue
+        elif line.startswith('##image-caption:'):
+            # todo подписи изображений
+            continue
         if line.startswith('##image:'):
-            # todo
+            # todo изображения в исходной форме (для формул)
+            continue
+        elif line.startswith('##bold-line:'):
+            # todo подглавы в теории
+            continue
+        elif line.startswith('##sub:'):
+            # todo подстроки (исп. в формулах)
+            continue
+        elif line.startswith('##card-info-start:') or line.startswith('##card-info-end'):
+            # todo дополнительные информационные карточки
             continue
         result.append(f'<div class="text-indent">{line}</div>')
     return "".join(result)

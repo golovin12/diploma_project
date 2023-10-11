@@ -1,12 +1,11 @@
 {% extends "detect/base.html" %}
 {% load static %}
-{% block dop-menu %}
-<nav class = "bot-menu">
-<ul class="menu-dop">
-	<li><a href="/theory/1/">1. Общие сведения о задаче детектирования</a></li>
-	<li><a href="/theory/2/">2. Классификация методов детектирования</a></li>
-	<li><a href="/theory/3/">3. Перспективы развития методов детектирвоания</a></li>
-</nav>
-{% endblock dop-menu %}
-{% block content %}
-{% endblock content %}
+{% block secondary-navbar %}
+    <nav class="bot-menu">
+        <ul class="menu-dop">
+            <li><a href="{% url 'detect:theory1' %}">1. Общие сведения о задаче детектирования</a></li>
+            <li><a href="{% url 'detect:theory2' %}">2. Классификация методов детектирования</a></li>
+            <li><a href="{% url 'detect:theory3' %}">3. Перспективы развития методов детектирвоания</a></li>
+        </ul>
+    </nav>
+{% endblock %}

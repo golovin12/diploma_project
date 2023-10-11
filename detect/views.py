@@ -46,22 +46,22 @@ def theory1(request):
     return render(request, 'detect/theory1.html', context=data)
 
 
-# Выводит теорию из файла
+@require_GET
 def theory2(request):
     with open('theory/theory2.txt', 'r', encoding='UTF-8') as f:
-        lines = f.readlines()
-    data = {"tema": "2. Классификация методов детектирования",
-            "lines": lines
+        text = f.readlines()
+    data = {"header": "2. Классификация методов детектирования",
+            "text": text
             }
     return render(request, 'detect/theory2.html', context=data)
 
 
-# Выводит теорию из файла
+@require_GET
 def theory3(request):
     with open('theory/theory3.txt', 'r', encoding='UTF-8') as f:
-        lines = f.readlines()
-    data = {"tema": "3. Перспективы развития методов детектирования",
-            "lines": lines
+        text = f.readlines()
+    data = {"header": "3. Перспективы развития методов детектирования",
+            "text": text
             }
     return render(request, 'detect/theory3.html', context=data)
 

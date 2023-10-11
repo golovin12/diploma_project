@@ -2,7 +2,7 @@
 {% load static %}
 <html lang="ru">
 <head>
-    <title>{% block title %}Детектирование сигналов{% endblock title %}</title>
+    <title>{% block title %}Детектирование сигналов{% endblock %}</title>
     {# Icon #}
     <link rel="shortcut icon" href="{% static "diploma/images/favicon.ico" %}" type="image/x-icon"/>
     {# Meta tags #}
@@ -17,25 +17,27 @@
             min-width: 750px;
         }
     </style>
-    {% block extrastyle %}{% endblock extrastyle %}
+    {% block extrastyle %}{% endblock %}
 </head>
 <body>
-{% block navbar %}
-    <nav class="navbar-top">
-        <a class="navbar-logo" href="/"><img src="{% static "diploma/images/logo_uisi.png" %}" alt="logo_uisi"></a>
-        <ul class="navbar-links">
-            {% block navbar-links %}{% endblock %}
-        </ul>
-    </nav>
-{% endblock %}
-{% block secondary-navbar %}{% endblock %}
-<div>
-    <div class="main-content">
-        {% block content %}{% endblock %}
+    {% block body-start %}{% endblock %}
+    {% block navbar %}
+        <nav class="navbar-top">
+            <a class="navbar-logo" href="/"><img src="{% static "diploma/images/logo_uisi.png" %}" alt="logo_uisi"></a>
+            <ul class="navbar-links">
+                {% block navbar-links %}{% endblock %}
+            </ul>
+        </nav>
+    {% endblock %}
+    {% block secondary-navbar %}{% endblock %}
+    <div>
+        <div class="main-content">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="footer text-indent">
+            Сайт для изучения тории о Детектировании сигналов и выполнению лабораторной работы. Город Екатеринбург 2021г.
+        </div>
     </div>
-    <div class="footer text-indent">
-        Сайт для изучения тории о Детектировании сигналов и выполнению лабораторной работы. Город Екатеринбург 2021г.
-    </div>
-</div>
+    {% block extrascript %}{% endblock %}
 </body>
 </html>
