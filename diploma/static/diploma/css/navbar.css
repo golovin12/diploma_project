@@ -5,8 +5,7 @@
     border-radius: 30px;
     background: rgba(255, 255, 255, .8);
     box-shadow: 3px 0 7px rgba(0, 0, 0, .3);
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 0 1em;
     text-align: center;
     padding: 18px;
 }
@@ -90,8 +89,7 @@
 .bot-menu {
     border: ridge 5px rgba(210, 105, 30, 0.6);
     border-radius: 30px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin: 0 1em;
     background: rgba(255, 255, 255, .6);
     box-shadow: 3px 0 7px rgba(0, 0, 0, .3);
     padding: 3px;
@@ -168,10 +166,4 @@
     .menu-dop li {
         display: block;
     }
-}
-
-.test_text {
-    margin-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
 }

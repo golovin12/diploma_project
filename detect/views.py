@@ -3,38 +3,22 @@ import warnings
 
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
-from django.views.decorators.http import require_GET, require_http_methods
 from scipy.fft import fft, ifft
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import Paginator
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET, require_http_methods
 
 from modulation_script import QAMModem, PSKModem
-from .forms import UserForm
+from .forms import UserForm, ModulationInfluenceSNRFrom
 from .models import Student
-from .utils import convert_base, for_test, graf, for_percent, for_lab1, for_lab2, sozvezd
+from .utils import convert_base, for_test, graf, for_percent, for_lab1, for_lab2
 
 warnings.filterwarnings('ignore')
-
-# Запоминает вопросы пользователя
-otveti_for_users = []
-otveti_slovar = {}
-file_lab1 = []
-file_lab2 = []
-file_lab4 = []
-file_sozvezd2 = []
-
-
-def znach(voprosi, otveti):
-    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
-    global otveti_slovar
-    t = random.randint(-99999999, 99999999)
-    while otveti_slovar.get(str(t)) != None:
-        t = random.randint(-99999999, 99999999)
-    otveti_slovar[str(t)] = [voprosi, otveti]
-    return str(t)
 
 
 @require_GET
@@ -76,53 +60,187 @@ def theory3(request):
     return render(request, 'detect/theory3.html', context=data)
 
 
-# Для практических заданий
+@require_GET
 @never_cache
-def laborathory1(request):
-    global file_lab1
-    # Создание графика
+def result_is_db(request: WSGIRequest):
+    """Возвращает информацию о статусе выполнения заданий студентами"""
+    page_number = request.GET.get('page')
+    students = Student.objects.all()
+    paginator = Paginator(students, 50)
+    students_results = []
+    for index, student in enumerate(paginator.get_page(page_number), start=1):
+        student: Student
+        result = f"{index}) {student}"
+        result += f" прошёл тест на {student.test_percent}% "
+        result += f"(дата прохождения: {student.create_dt.strftime('%d.%m.%Y')})"
+        students_results.append(result)
+    return render(request, 'detect/result_is_db.html', context={"spisok": students_results})
+
+
+@require_http_methods(["GET", "POST"])
+@never_cache
+def final_test(request):
+    # Выводит Тестовые вопросы, просит пользователя авторизоваться и, при успешном выполнении теста, выводит результат.
+    global otveti_for_users
+    c = 0
+    userform = UserForm()  # Создаются поля для ввода Имени, Фамилии и Группы
+    if request.method == "POST":  # Проверяется, вводил ли пользователь свои данные и ответил ли на вопросы
+        # Т.к. изначально при входе на страницу ничего не введено, то эта функция вызывается после else (поэтому сначала надо смотреть на работу этого пункта)
+        name = request.POST.get("name")
+        surname = request.POST.get("family")
+        group = request.POST.get("group")
+        pk = request.POST.get("id")
+        voprosi, otveti = otveti_slovar.get(pk)[0], otveti_slovar.get(pk)[1]
+        for i in range(len(voprosi)):  # Перебирает каждый ответ, выбранный пользователем
+            a = request.POST.get(
+                str(voprosi[i][5]))  # Извлекаю из каждого вопроса варианты ответов, выбранные пользователем
+            if a == otveti[i]:  # Сверяю извлеченный ответ с правильным ответом
+                c += 1
+        test_percent = 100 * c // len(voprosi)  # Подсчёт процента правильных ответов пользователя
+
+        if test_percent >= 80:  # Если процент больше 80, то создаю в БД строку, в которой записываются Данные пользователя и процент правильных ответов,
+            # а также отправляет пользователя на страницу, где будет написан результат выполнения теста
+            Student.objects.create(name=name, surname=surname, group=group, test_percent=test_percent)
+            otveti_for_users.remove(pk)
+            otveti_slovar.pop(pk)
+            result = "{0} {1} из группы {2}. Вы прошли тест на: {3}%. Покажите результат преподавателю!".format(name,
+                                                                                                                surname,
+                                                                                                                group,
+                                                                                                                test_percent)
+            return render(request, 'detect/result.html', context={"result": result})
+        else:  # Если процент выполнения меньше 80, то заново формируются блоки вопросов и ответов, пользователь отправляется заново проходить тест
+            zagolovok, voprosi, otveti = for_test('tests/test1.txt', 15)
+            otveti_for_users.remove(pk)
+            otveti_slovar.pop(pk)
+            pk = znach(voprosi, otveti)
+            otveti_for_users.append(pk)
+            result = "Вы прошли тест на: {}%. Попробуйте ещё раз!".format(test_percent)
+            return render(request, 'detect/final_test.html',
+                          context={"zagolovok": zagolovok, "voprosi": voprosi, "form": userform, "result": result,
+                                   "id": pk})
+    else:  # Когда пользователь только заходит на страницу теста, то для него формируются вопросы и ответы, которые запоминаются в функции func5
+        zagolovok, voprosi, otveti = for_test('tests/test1.txt',
+                                              15)  # Получение из файла перемешанных вопросов и ответов к ним.
+        pk = znach(voprosi, otveti)
+        otveti_for_users.append(pk)
+        result = "Введите свои данные и проходите тест:"
+        return render(request, 'detect/final_test.html',
+                      context={"zagolovok": zagolovok, "voprosi": voprosi, "form": userform, "result": result,
+                               "id": pk})
+
+
+@require_http_methods(["POST", "GET"])
+def lab1_example(request: WSGIRequest):
+    form = ModulationInfluenceSNRFrom
     if request.method == "POST":
-        prin = request.POST.get("Modulation")  # Получаю тип модуляции, выбранный пользователем
-        snr = float(request.POST.get("snr"))  # Получаю SNR выбранное пользователем
-        modulat = prin[-3:]
-        t_modulat = prin[:-3]
-        graf(modulat, t_modulat)  # Проверка на наличие графика области решений
-        if modulat == "PSK":  # Создание модема
-            modem = PSKModem(int(t_modulat))
-        else:
-            modem = QAMModem(int(t_modulat))
-        msg, d, modulated, t = for_percent(1, modem, t_modulat,
-                                           snr)  # Получение переменных (сообщение, демодулированный список, модулированный список и сообщ после гауссовского шума)
-        f1, f2 = for_lab1([modulated, t], "lab1")[0], for_lab1([modulated, t], "lab1")[
-            1]  # Создание сигналов и получение их номера в файле
-        # Для данного типа модуляции и SNR расчёт процента ошибочно принятых сообщений
-        a = 0
-        for i in range(1000):
-            soobh = for_percent(10, modem, t_modulat, snr)
-            if "y" == soobh:
-                a += 1
-            else:
-                a = a
-        percent = round(100 - a * 100 / 1000, 3)
-        # Формирование вывода о данном типе модуляции и SNR
-        c = ""
-        if percent <= 1 and percent != 0:
-            c = "0"
-            itog = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектирвоании 1000 сообщений, с ошибкой было детектировано всего {}%, что соответствует условию 'около 0.5%'. Зафиксируйте полученный результат".format(
-                percent)
-        elif percent == 0:
-            c = "1"
-            itog = "Продолжайте подбирать SNR (уменьшайте значение). Из 1000 переданных сообщений, с ошибкой было детектировано {}%, а вам необходимо подобрать такое SNR, при котором вероятность детектирования сообщения с ошибкой будет 'около 0.5%'".format(
-                percent)
-        else:
-            c = "1"
-            itog = "Продолжайте подбирать SNR (увеличивайте значение). Из 1000 переданных сообщений, с ошибкой было детектировано целых {}%, а это больше необходимых 0.5%".format(
-                percent)
-        return render(request, 'detect/laborathory1.html',
-                      context={"modulat": modulat, "t_modulat": t_modulat, "msg": msg, "c": c,
-                               "demodulated": d, "itog": itog, "f1": f1, "f2": f2, "snr": snr})
+        form = form(request.POST)
+        if form.is_valid():
+            modulation = form.cleaned_data['modulation']
+            return HttpResponseRedirect(reverse('detect:laboratory1', kwargs={'modulation': modulation}))
+    return render(request, 'detect/lab1_example.html', {'form': form})
+
+
+@require_http_methods(["POST", "GET"])
+@never_cache
+def laboratory1(request: WSGIRequest, modulation: str):
+    # Создание графика
+    ...
+    # if request.method == "POST":
+    #     modulation = request.POST.get("modulation")  # Получаю тип модуляции, выбранный пользователем
+    #     snr = float(request.POST.get("snr"))  # Получаю SNR выбранное пользователем
+    #     modulation_position, modulation_type = modulation.split('-')
+    #     graf(modulat, t_modulat)  # Проверка на наличие графика области решений
+    #     if modulat == "PSK":  # Создание модема
+    #         modem = PSKModem(int(t_modulat))
+    #     else:
+    #         modem = QAMModem(int(t_modulat))
+    #     msg, d, modulated, t = for_percent(1, modem, t_modulat,
+    #                                        snr)  # Получение переменных (сообщение, демодулированный список, модулированный список и сообщ после гауссовского шума)
+    #     f1, f2 = for_lab1([modulated, t], "lab1")[0], for_lab1([modulated, t], "lab1")[
+    #         1]  # Создание сигналов и получение их номера в файле
+    #     # Для данного типа модуляции и SNR расчёт процента ошибочно принятых сообщений
+    #     a = 0
+    #     for i in range(1000):
+    #         soobh = for_percent(10, modem, t_modulat, snr)
+    #         if "y" == soobh:
+    #             a += 1
+    #         else:
+    #             a = a
+    #     percent = round(100 - a * 100 / 1000, 3)
+    #     # Формирование вывода о данном типе модуляции и SNR
+    #     c = ""
+    #     if percent <= 1 and percent != 0:
+    #         c = "0"
+    #         itog = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектирвоании 1000 сообщений, с ошибкой было детектировано всего {}%, что соответствует условию 'около 0.5%'. Зафиксируйте полученный результат".format(
+    #             percent)
+    #     elif percent == 0:
+    #         c = "1"
+    #         itog = "Продолжайте подбирать SNR (уменьшайте значение). Из 1000 переданных сообщений, с ошибкой было детектировано {}%, а вам необходимо подобрать такое SNR, при котором вероятность детектирования сообщения с ошибкой будет 'около 0.5%'".format(
+    #             percent)
+    #     else:
+    #         c = "1"
+    #         itog = "Продолжайте подбирать SNR (увеличивайте значение). Из 1000 переданных сообщений, с ошибкой было детектировано целых {}%, а это больше необходимых 0.5%".format(
+    #             percent)
+    #     return render(request, 'detect/laborathory1.html',
+    #                   context={"modulat": modulat, "t_modulat": t_modulat, "msg": msg, "c": c,
+    #                            "demodulated": d, "itog": itog, "f1": f1, "f2": f2, "snr": snr})
+
+
+# Запоминает вопросы пользователя
+otveti_for_users = []
+otveti_slovar = {}
+file_lab1 = []
+file_lab2 = []
+file_lab4 = []
+file_sozvezd2 = []
+
+
+def znach(voprosi, otveti):
+    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
+    global otveti_slovar
+    t = random.randint(-99999999, 99999999)
+    while otveti_slovar.get(str(t)) != None:
+        t = random.randint(-99999999, 99999999)
+    otveti_slovar[str(t)] = [voprosi, otveti]
+    return str(t)
+
+
+def sozvezd(soobh, t_modulat, modulat, put):
+    global file_sozvezd2
+    vih = []
+    fig, ax = plt.subplots()
+    g = int(t_modulat)
+    if modulat == "PSK":
+        modem = PSKModem(g)
+        m = "PSK модуляция"
     else:
-        return render(request, 'detect/vhod.html')
+        modem = QAMModem(g)
+        m = "QAM модуляция"
+    modem.plot_constellation(int(t_modulat))
+    if int(t_modulat) == 2:
+        plt.scatter(-0.5, 0.5, c='white', s=1)
+        plt.scatter(0.5, -0.5, c='white', s=1)
+    ax.set_xlabel('I (Синфазная ось)', labelpad=120)
+    ax.set_ylabel('Q (Квадратурная ось)', labelpad=160)
+    ax.spines['left'].set_position(('data', 0.0))
+    ax.spines['bottom'].set_position(('data', 0.0))
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+    ax.axes.get_xaxis().set_ticklabels([])
+    ax.axes.get_yaxis().set_ticklabels([])
+    plt.title(str(t_modulat) + "-" + m)
+    for j in soobh:
+        plt.scatter(j.real, j.imag)
+    if len(file_sozvezd2) >= 52:
+        file_sozvezd2 = []
+    a = str(len(file_sozvezd2))
+    file_sozvezd2.append(a)
+    plt.savefig("static/" + put + "/" + file_sozvezd2[-1:][0] + "sozvezd.png")
+    plt.close()
+    vih.append(a)
+    return vih
 
 
 @never_cache
@@ -335,72 +453,3 @@ def laborathory4(request):
         vihod = "101" + vihod[::-1] + "011"
         vihod = convert_base(vihod, 20, 2)
         return render(request, 'detect/laborathory4.html', context={"put": put, "signal": signal, "vihod": vihod})
-
-
-@require_GET
-@never_cache
-def result_is_db(request: WSGIRequest):
-    """Возвращает информацию о статусе выполнения заданий студентами"""
-    page_number = request.GET.get('page')
-    students = Student.objects.all()
-    paginator = Paginator(students, 50)
-    students_results = []
-    for index, student in enumerate(paginator.get_page(page_number), start=1):
-        student: Student
-        result = f"{index}) {student}"
-        result += f" прошёл тест на {student.test_percent}% "
-        result += f"(дата прохождения: {student.create_dt.strftime('%d.%m.%Y')})"
-        students_results.append(result)
-    return render(request, 'detect/result_is_db.html', context={"spisok": students_results})
-
-
-@require_http_methods(["GET", "POST"])
-@never_cache
-def tests(request):
-    # Выводит Тестовые вопросы, просит пользователя авторизоваться и, при успешном выполнении теста, выводит результат.
-    global otveti_for_users
-    c = 0
-    userform = UserForm()  # Создаются поля для ввода Имени, Фамилии и Группы
-    if request.method == "POST":  # Проверяется, вводил ли пользователь свои данные и ответил ли на вопросы
-        # Т.к. изначально при входе на страницу ничего не введено, то эта функция вызывается после else (поэтому сначала надо смотреть на работу этого пункта)
-        name = request.POST.get("name")
-        surname = request.POST.get("family")
-        group = request.POST.get("group")
-        pk = request.POST.get("id")
-        voprosi, otveti = otveti_slovar.get(pk)[0], otveti_slovar.get(pk)[1]
-        for i in range(len(voprosi)):  # Перебирает каждый ответ, выбранный пользователем
-            a = request.POST.get(
-                str(voprosi[i][5]))  # Извлекаю из каждого вопроса варианты ответов, выбранные пользователем
-            if a == otveti[i]:  # Сверяю извлеченный ответ с правильным ответом
-                c += 1
-        test_percent = 100 * c // len(voprosi)  # Подсчёт процента правильных ответов пользователя
-
-        if test_percent >= 80:  # Если процент больше 80, то создаю в БД строку, в которой записываются Данные пользователя и процент правильных ответов,
-            # а также отправляет пользователя на страницу, где будет написан результат выполнения теста
-            Student.objects.create(name=name, surname=surname, group=group, test_percent=test_percent)
-            otveti_for_users.remove(pk)
-            otveti_slovar.pop(pk)
-            result = "{0} {1} из группы {2}. Вы прошли тест на: {3}%. Покажите результат преподавателю!".format(name,
-                                                                                                                surname,
-                                                                                                                group,
-                                                                                                                test_percent)
-            return render(request, 'detect/result.html', context={"result": result})
-        else:  # Если процент выполнения меньше 80, то заново формируются блоки вопросов и ответов, пользователь отправляется заново проходить тест
-            zagolovok, voprosi, otveti = for_test('tests/test1.txt', 15)
-            otveti_for_users.remove(pk)
-            otveti_slovar.pop(pk)
-            pk = znach(voprosi, otveti)
-            otveti_for_users.append(pk)
-            result = "Вы прошли тест на: {}%. Попробуйте ещё раз!".format(test_percent)
-            return render(request, 'detect/tests.html',
-                          context={"zagolovok": zagolovok, "voprosi": voprosi, "form": userform, "result": result,
-                                   "id": pk})
-    else:  # Когда пользователь только заходит на страницу теста, то для него формируются вопросы и ответы, которые запоминаются в функции func5
-        zagolovok, voprosi, otveti = for_test('tests/test1.txt',
-                                              15)  # Получение из файла перемешанных вопросов и ответов к ним.
-        pk = znach(voprosi, otveti)
-        otveti_for_users.append(pk)
-        result = "Введите свои данные и проходите тест:"
-        return render(request, 'detect/tests.html',
-                      context={"zagolovok": zagolovok, "voprosi": voprosi, "form": userform, "result": result,
-                               "id": pk})

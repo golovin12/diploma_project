@@ -1,3 +1,4 @@
+{% load bootstrap4 %}
 <!DOCTYPE html>
 {% load static %}
 <html lang="ru">
@@ -17,6 +18,7 @@
             min-width: 750px;
         }
     </style>
+    {% bootstrap_css %}
     {% block extrastyle %}{% endblock %}
 </head>
 <body>
@@ -34,7 +36,7 @@
         <div class="main-content">
             {% block content %}{% endblock %}
         </div>
-        <div class="footer text-indent">
+        <div class="site-footer text-indent">
             Сайт для изучения тории о Детектировании сигналов и выполнению лабораторной работы. Город Екатеринбург 2021г.
         </div>
     </div>

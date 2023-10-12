@@ -2,9 +2,9 @@
 {% load static %}
 
 {% block content %}
-    <div class="card">
-        <div class="card-header">{{ header }}</div>
-        <div class="card-body">
+    <div class="card-content">
+        <div class="text-center font-weight-bold h3">{{ header }}</div>
+        <div class="card-content-body">
             {% for line in text %}
                 {% if line == text.1 %}
                     <img class="bordered-image" src="{% static "detect/images/classification.png" %}" alt="classification"/>
@@ -51,7 +51,7 @@
                 {% endif %}
             {% endfor %}
             <div class="text-center">
-                <a href="#" class="button">Наверх</a>
+                <a href="#" class="orange-button">Наверх</a>
             </div>
         </div>
     </div>

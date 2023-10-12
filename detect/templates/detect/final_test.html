@@ -14,46 +14,46 @@
         </div>
         {% for i in voprosi %}
             {% if i.6 == '0' %}
-                <div class="card-info size120"><b>{{ i.5 }}. {{ i.0 }}</b><br>
-                    <input class="test_text" required type="radio" id="{{ i.5 }}{{ i.1 }}" name="{{ i.5 }}"
+                <div class="card-content-info size120"><b>{{ i.5 }}. {{ i.0 }}</b><br>
+                    <input required type="radio" id="{{ i.5 }}{{ i.1 }}" name="{{ i.5 }}"
                            value="{{ i.1 }}"/>
                     <label for="{{ i.5 }}{{ i.1 }}">{{ i.1 }}</label>
 
-                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.2 }}" name="{{ i.5 }}"
+                    <br><input required type="radio" id="{{ i.5 }}{{ i.2 }}" name="{{ i.5 }}"
                                value="{{ i.2 }}"/>
                     <label for="{{ i.5 }}{{ i.2 }}">{{ i.2 }}</label>
 
-                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.3 }}" name="{{ i.5 }}"
+                    <br><input required type="radio" id="{{ i.5 }}{{ i.3 }}" name="{{ i.5 }}"
                                value="{{ i.3 }}"/>
                     <label for="{{ i.5 }}{{ i.3 }}">{{ i.3 }}</label>
 
-                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.4 }}" name="{{ i.5 }}"
+                    <br><input required type="radio" id="{{ i.5 }}{{ i.4 }}" name="{{ i.5 }}"
                                value="{{ i.4 }}"/>
                     <label for="{{ i.5 }}{{ i.4 }}">{{ i.4 }}</label>
                 </div>
             {% else %}
-                <div class="card-info size120"><b>{{ i.5 }}. {{ i.0 }}</b><br>
-                    <img id="u3000-80" src={{ i.6 }} alt="{{ i.6 }}"/><br>
-                    <input class="test_text" required type="radio" id="{{ i.5 }}{{ i.1 }}" name="{{ i.5 }}"
+                <div class="card-content-info size120"><b>{{ i.5 }}. {{ i.0 }}</b><br>
+                    <img class="bordered-image" style="margin-left: 0;" src={{ i.6 }} alt="{{ i.6 }}"/>
+                    <input required type="radio" id="{{ i.5 }}{{ i.1 }}" name="{{ i.5 }}"
                            value="{{ i.1 }}"/>
                     <label for="{{ i.5 }}{{ i.1 }}">{{ i.1 }}</label>
 
-                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.2 }}" name="{{ i.5 }}"
+                    <br><input required type="radio" id="{{ i.5 }}{{ i.2 }}" name="{{ i.5 }}"
                                value="{{ i.2 }}"/>
                     <label for="{{ i.5 }}{{ i.2 }}">{{ i.2 }}</label>
 
-                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.3 }}" name="{{ i.5 }}"
+                    <br><input required type="radio" id="{{ i.5 }}{{ i.3 }}" name="{{ i.5 }}"
                                value="{{ i.3 }}"/>
                     <label for="{{ i.5 }}{{ i.3 }}">{{ i.3 }}</label>
 
-                    <br><input class="test_text" required type="radio" id="{{ i.5 }}{{ i.4 }}" name="{{ i.5 }}"
+                    <br><input required type="radio" id="{{ i.5 }}{{ i.4 }}" name="{{ i.5 }}"
                                value="{{ i.4 }}"/>
                     <label for="{{ i.5 }}{{ i.4 }}">{{ i.4 }}</label>
                 </div>
             {% endif %}
         {% endfor %}
         <div class="text-center" style="margin: 0 1em 1em 1em">
-            <button name="test_button" style="width: 50%; padding: 10px 0;" type="submit" class="button">
+            <button name="submit_button" style="width: 50%; padding: 10px 0;" type="submit" class="orange-button">
                 Проверить
             </button>
         </div>

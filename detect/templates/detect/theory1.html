@@ -1,9 +1,9 @@
 {% extends "detect/base_theory.html" %}
 {% load static %}
 {% block content %}
-    <div class="card">
-        <div class="card-header">{{ header }}</div>
-        <div class="card-body">
+    <div class="card-content">
+        <div class="text-center font-weight-bold h3">{{ header }}</div>
+        <div class="card-content-body">
             {% for line in text %}
                 {% if line == text.0 %}
                     <img class="bordered-image" src="{% static "detect/images/shema_peredachi.png" %}"
@@ -61,7 +61,7 @@
                 {% endif %}
             {% endfor %}
             <div class="text-center">
-                <a class="button" href="#">Наверх</a>
+                <a class="orange-button" href="#">Наверх</a>
             </div>
         </div>
     </div>
