@@ -1,8 +1,8 @@
 {% extends "detect/base.html" %}
 {% load text_tags %}
 {% block content %}
-    <div class="card">
-        <div class="card-header">{{ header }}</div>
-        <div class="card-body">{{ text|text_format }}</div>
+    <div class="card-content">
+        <div class="text-center font-weight-bold h3">{{ header }}</div>
+        <div class="card-content-body">{{ text|text_format }}</div>
     </div>
 {% endblock %}

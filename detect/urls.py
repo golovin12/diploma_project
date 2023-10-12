@@ -15,6 +15,6 @@ urlpatterns = [
     path('laborathory/2/', views.laborathory2, name="laboratory2"),
     path('laborathory/3/', views.laborathory3, name="laboratory3"),
     path('laborathory/4/', views.laborathory4, name="laboratory4"),
-    path('test/', views.tests, name="test"),
+    path('test/', views.final_test, name="final_test"),
     path('result_is_db/', views.result_is_db, name="result"),
 ]
