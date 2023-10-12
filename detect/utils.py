@@ -1,6 +1,7 @@
-import random
+import math, cmath
+import uuid
 
-import numpy
+import numpy as np
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
 from numba import jit
@@ -70,15 +71,9 @@ def for_test(file_name, kolich):
 
 # ФУНКИИ ДЛЯ ПРАКТИЧЕСКОЙ ЧАСТИ
 # Построение графиков области решений и вывод пути для них
-def graf(modulation_type, modulation_position):
-    b = "static/graph/" + modulation_position + modulation_type + ".png"
+def graf(modem, modulation: str, modulation_position: int):
+    b = "static/detect/graph/" + modulation + ".png"
     fig, ax = plt.subplots()
-    if modulation_type == "PSK":
-        modem = PSKModem(modulation_position)
-        m = "PSK модуляция"
-    else:
-        modem = QAMModem(modulation_position)
-        m = "QAM модуляция"
     modem.plot_constellation(modulation_position)
     if modulation_position == 2:
         plt.scatter(-1, 1, c='white', s=1)
@@ -91,7 +86,7 @@ def graf(modulation_type, modulation_position):
     ax.spines['top'].set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    plt.title(modulation_position + "-" + m)
+    plt.title(modulation + " модуляция")
     plt.savefig(b)
     plt.close()
     return b
@@ -102,31 +97,31 @@ def graf(modulation_type, modulation_position):
 def soobhenie(c, t_modulat):
     soobh = []
     for i in range(c):
-        k = numpy.log2(t_modulat)
+        k = np.log2(t_modulat)
         if k == 1:
             for j in range(8):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         elif k == 2:
             for j in range(10):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         elif k == 3:
             for j in range(12):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         elif k == 4:
             for j in range(16):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         elif k == 5:
             for j in range(20):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         elif k == 6:
             for j in range(24):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         elif k == 7:
             for j in range(28):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         else:
             for j in range(32):
-                soobh.append(numpy.random.randint(0, 2, 1)[0])
+                soobh.append(np.random.randint(0, 2, 1)[0])
         return soobh
 
 
@@ -157,10 +152,7 @@ def for_percent(c, modem, t_modulat, snr):
 
 
 # Построение графика модулированного сигнала и сигнала, пропущенного через шум; вывод пути до построенных графиков
-def for_lab1(a, put):
-    import math, cmath
-    import numpy as np
-    global file_lab1
+def for_lab1(a, folder):
     vih = []
     for signal in a:
         fig, ax = plt.subplots()
@@ -177,16 +169,13 @@ def for_lab1(a, put):
                     (signal[i + 1].real) ** 2 + (signal[i + 1].imag) ** 2) * np.sin(
                     cmath.phase(signal[i + 1]))], color='k')
             plt.plot(g, u)
-        if len(file_lab1) >= 104:
-            file_lab1 = []
-        a = str(len(file_lab1))
-        file_lab1.append(a)
         plt.grid()
         ax.set_xlabel('Время, с')
         ax.set_ylabel('Амплитуда, В')
-        plt.savefig("static/" + put + "/" + file_lab1[-1:][0] + ".png")
+        file_name = uuid.uuid4()
+        plt.savefig(f"detect/static/detect/{folder}/{file_name}.png")
         plt.close()
-        vih.append(a)
+        vih.append(file_name)
     return vih
 
 

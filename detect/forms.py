@@ -1,8 +1,8 @@
-from commpy import PSKModem, QAMModem
 from django import forms
 
+from modulation_script import QAMModem, PSKModem
 from .consts import modulation_choices
-from .utils import graf, for_percent, for_lab1
+from .utils import for_percent, for_lab1
 
 
 class DemodulateInfluenceSNRFrom(forms.Form):
@@ -11,6 +11,8 @@ class DemodulateInfluenceSNRFrom(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['snr'].widget.attrs['placeholder'] = '12.55'
+        self.fields['snr'].widget.attrs['class'] = 'is-invalid'
         self._path_to_modulation_img = None
         self._original_message = None
         self._demodulated_message = None
@@ -42,9 +44,8 @@ class DemodulateInfluenceSNRFrom(forms.Form):
         # К юзеру привязывается лаба.
         # В этой лабе сохраняются картинки последних сигналов (старые - удаляются) !!!Для каждой модуляции!!!.
         # Если юзер прошёл лабу - ему предлагают выполнить с другой модуляцией или перейти к следующей лабе.
-        # Картинки модуляций хранятся в отдельном объекте и создаются заново, если их нет.
         modulation = self.cleaned_data['modulation']
-        snr = self.cleaned_data['snr']
+        snr = float(self.cleaned_data['snr'])
         modulation_position, modulation_type = modulation.split('-')
         modulation_position = int(modulation_position)
 
@@ -63,11 +64,12 @@ class DemodulateInfluenceSNRFrom(forms.Form):
                 a += 1
         self._original_message = msg
         self._demodulated_message = d
-        # Проверка на наличие графика области решений
-        self._path_to_modulation_img = graf(modulation_type, modulation_position)
+        # Проверка на наличие графика области решений graf(modem, modulation, modulation_position)
+        self._path_to_modulation_img = f"/static/detect/graph/{modulation}.png"
         # Создание сигналов и получение их номера в файле
         images = for_lab1([modulated, t], "lab1")
-        self._path_to_orig_message, self._path_to_message_with_gauss = images[0], images[1]
+        self._path_to_orig_message = f"/static/detect/lab1/{images[0]}.png"
+        self._path_to_message_with_gauss = f"/static/detect/lab1/{images[1]}.png"
         return round(100 - a * 100 / 1000, 3)
 
 

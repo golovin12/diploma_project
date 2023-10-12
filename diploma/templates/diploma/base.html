@@ -9,6 +9,7 @@
     {# Meta tags #}
     <meta charset="utf-8"/>
     {# Styles #}
+    {% bootstrap_css %}
     <link rel="stylesheet" href="{% static "diploma/css/navbar.css" %}"/>
     <link rel="stylesheet" href="{% static "diploma/css/index.css" %}"/>
     <style>
@@ -18,7 +19,6 @@
             min-width: 750px;
         }
     </style>
-    {% bootstrap_css %}
     {% block extrastyle %}{% endblock %}
 </head>
 <body>
