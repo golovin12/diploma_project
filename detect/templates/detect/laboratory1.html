@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block content %}
-    <div class="card">
+    <div class="card-content">
         <form method="POST">
             {% csrf_token %}
-            <p class="card-header">Практическое задание 1</p>
-            <p class="card-header">"Изучение влияния SNR на качество детектирования"</p>
-            <div class="card-body">
+            <p class="text-center font-weight-bold h3">Практическое задание 1</p>
+            <p class="text-center font-weight-bold h4">"Изучение влияния SNR на качество детектирования"</p>
+            <div class="card-content-body">
                 <input type="hidden" name="Modulation" value="{{ t_modulat }}{{ modulat }}"/>
                 <p id="u3870-311">Выбранный тип модуляции: {{ t_modulat }}-{{ modulat }}</p>
                 <p>Исходное сообщение, которое будет передаваться по каналу связи: {{ msg }}</p>

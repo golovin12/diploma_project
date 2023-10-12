@@ -7,16 +7,14 @@ from scipy.fft import fft, ifft
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import Paginator
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 
 from modulation_script import QAMModem, PSKModem
-from .forms import UserForm, ModulationInfluenceSNRFrom
+from .forms import UserForm, DemodulateInfluenceSNRFrom
 from .models import Student
-from .utils import convert_base, for_test, graf, for_percent, for_lab1, for_lab2
+from .utils import convert_base, for_test, for_lab2
 
 warnings.filterwarnings('ignore')
 
@@ -129,61 +127,36 @@ def final_test(request):
                                "id": pk})
 
 
-@require_http_methods(["POST", "GET"])
+@require_GET
 def lab1_example(request: WSGIRequest):
-    form = ModulationInfluenceSNRFrom
-    if request.method == "POST":
-        form = form(request.POST)
-        if form.is_valid():
-            modulation = form.cleaned_data['modulation']
-            return HttpResponseRedirect(reverse('detect:laboratory1', kwargs={'modulation': modulation}))
-    return render(request, 'detect/lab1_example.html', {'form': form})
+    return render(request, 'detect/lab1_example.html', {'form': DemodulateInfluenceSNRFrom})
 
 
 @require_http_methods(["POST", "GET"])
 @never_cache
-def laboratory1(request: WSGIRequest, modulation: str):
-    # Создание графика
-    ...
-    # if request.method == "POST":
-    #     modulation = request.POST.get("modulation")  # Получаю тип модуляции, выбранный пользователем
-    #     snr = float(request.POST.get("snr"))  # Получаю SNR выбранное пользователем
-    #     modulation_position, modulation_type = modulation.split('-')
-    #     graf(modulat, t_modulat)  # Проверка на наличие графика области решений
-    #     if modulat == "PSK":  # Создание модема
-    #         modem = PSKModem(int(t_modulat))
-    #     else:
-    #         modem = QAMModem(int(t_modulat))
-    #     msg, d, modulated, t = for_percent(1, modem, t_modulat,
-    #                                        snr)  # Получение переменных (сообщение, демодулированный список, модулированный список и сообщ после гауссовского шума)
-    #     f1, f2 = for_lab1([modulated, t], "lab1")[0], for_lab1([modulated, t], "lab1")[
-    #         1]  # Создание сигналов и получение их номера в файле
-    #     # Для данного типа модуляции и SNR расчёт процента ошибочно принятых сообщений
-    #     a = 0
-    #     for i in range(1000):
-    #         soobh = for_percent(10, modem, t_modulat, snr)
-    #         if "y" == soobh:
-    #             a += 1
-    #         else:
-    #             a = a
-    #     percent = round(100 - a * 100 / 1000, 3)
-    #     # Формирование вывода о данном типе модуляции и SNR
-    #     c = ""
-    #     if percent <= 1 and percent != 0:
-    #         c = "0"
-    #         itog = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектирвоании 1000 сообщений, с ошибкой было детектировано всего {}%, что соответствует условию 'около 0.5%'. Зафиксируйте полученный результат".format(
-    #             percent)
-    #     elif percent == 0:
-    #         c = "1"
-    #         itog = "Продолжайте подбирать SNR (уменьшайте значение). Из 1000 переданных сообщений, с ошибкой было детектировано {}%, а вам необходимо подобрать такое SNR, при котором вероятность детектирования сообщения с ошибкой будет 'около 0.5%'".format(
-    #             percent)
-    #     else:
-    #         c = "1"
-    #         itog = "Продолжайте подбирать SNR (увеличивайте значение). Из 1000 переданных сообщений, с ошибкой было детектировано целых {}%, а это больше необходимых 0.5%".format(
-    #             percent)
-    #     return render(request, 'detect/laborathory1.html',
-    #                   context={"modulat": modulat, "t_modulat": t_modulat, "msg": msg, "c": c,
-    #                            "demodulated": d, "itog": itog, "f1": f1, "f2": f2, "snr": snr})
+def laboratory1(request: WSGIRequest):
+    form = DemodulateInfluenceSNRFrom
+    if request.method == "POST":
+        form = form(request.POST)
+        if form.is_valid():
+            errors_percent = form.calculate_percent()
+            # Формирование вывода о влиянии SNR на выбранный тип модуляции
+            if 0 < errors_percent <= 1:
+                is_complete = True
+                result_text = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектирвоании 1000 " \
+                              "сообщений, с ошибкой было детектировано всего {}%, что соответствует условию 'около " \
+                              "0.5%'. Зафиксируйте полученный результат"
+            else:
+                is_complete = False
+                result_text = "Продолжайте подбирать SNR. Из 1000 переданных сообщений с ошибкой было детектировано " \
+                              "{}%, а вам необходимо подобрать такое SNR, при котором вероятность детектирования " \
+                              "сообщения с ошибкой будет 'около 0.5%'"
+            result_text = result_text.format(errors_percent)
+            return render(request, 'detect/laboratory1.html',
+                          context={"form": form,
+                                   "result_text": result_text,
+                                   "is_complete": is_complete})
+    return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
 
 
 # Запоминает вопросы пользователя

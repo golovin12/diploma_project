@@ -70,18 +70,17 @@ def for_test(file_name, kolich):
 
 # ФУНКИИ ДЛЯ ПРАКТИЧЕСКОЙ ЧАСТИ
 # Построение графиков области решений и вывод пути для них
-def graf(modulat, t_modulat):
-    b = "static/graph/" + t_modulat + modulat + ".png"
+def graf(modulation_type, modulation_position):
+    b = "static/graph/" + modulation_position + modulation_type + ".png"
     fig, ax = plt.subplots()
-    g = int(t_modulat)
-    if modulat == "PSK":
-        modem = PSKModem(g)
+    if modulation_type == "PSK":
+        modem = PSKModem(modulation_position)
         m = "PSK модуляция"
     else:
-        modem = QAMModem(g)
+        modem = QAMModem(modulation_position)
         m = "QAM модуляция"
-    modem.plot_constellation(int(t_modulat))
-    if int(t_modulat) == 2:
+    modem.plot_constellation(modulation_position)
+    if modulation_position == 2:
         plt.scatter(-1, 1, c='white', s=1)
         plt.scatter(1, -1, c='white', s=1)
     ax.set_xlabel('I (Синфазная ось)', labelpad=120)
@@ -92,7 +91,7 @@ def graf(modulat, t_modulat):
     ax.spines['top'].set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    plt.title(t_modulat + "-" + m)
+    plt.title(modulation_position + "-" + m)
     plt.savefig(b)
     plt.close()
     return b
