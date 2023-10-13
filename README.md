@@ -1,7 +1,7 @@
 # Сайт, предназначенный для выполнения лабораторной работы по детектированию сигналов.
 Первый опыт работы с Django, html, css
 ## Используемые библиотеки:
-Django, numpy, matplotlib, numba, scikit-commpy
+Django, numpy, matplotlib, scikit-commpy
 #### * Ключ приложения необходимо расположить в keys/keys.py в виде переменной SECRET_KEY
 ## Внешний вид сайта:
 ![Alt text](/detect.png?raw=true "Внешний вид сайта")

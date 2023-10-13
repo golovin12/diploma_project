@@ -58,22 +58,15 @@ class DemodulateInfluenceSNRFrom(forms.Form):
         percent_errors = self.calculate_percent(modem, modulation_position, snr)
         if 0 < percent_errors <= 1:
             is_complete = True
-            result_text = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектировании 1000 " \
-                          f"сообщений, с ошибкой было детектировано всего {percent_errors}%, что соответствует " \
-                          f"условию 'около 0.5%'. Зафиксируйте полученный результат."
-
         else:
             is_complete = False
-            result_text = "Продолжайте подбирать SNR. Из 1000 переданных сообщений с ошибкой было детектировано " \
-                          f"{percent_errors}%, а вам необходимо подобрать такое SNR, при котором вероятность " \
-                          "детектирования сообщения с ошибкой будет 'около 0.5%'"
 
         return {'original_message': original_msg,
                 'demodulated_message': demodulated_msg,
                 'path_to_modulated_signal': modulated_signal_image.image.url,
                 'path_to_signal_with_gauss': signal_with_gauss_image.image.url,
                 'modulation_image_path': self.get_modulation_img_path(modem, modulation_position, modulation),
-                'result_text': result_text,
+                'percent_errors': percent_errors,
                 'is_complete': is_complete,
                 'modulation': modulation,
                 'snr': snr,

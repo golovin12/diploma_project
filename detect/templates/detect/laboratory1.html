@@ -4,7 +4,7 @@
 
 {% block content %}
     {% if request.user.lab1_is_complete %}
-        <div class="card-info-bold">
+        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
             Вы успешно подобрали SNR для 3 видов сигналов, можете перейти к следующей практике!
         </div>
     {% endif %}
@@ -38,7 +38,11 @@
             <p>{{ original_message }}</p>
             {% if is_complete %}
                 <div class="card-content-info">
-                    <p class="text-indent">{{ result_text }}</p>
+                    <p class="text-indent">
+                        Вы справились с заданием, вы подобрали такое SNR, при котором при детектировании 1000 сообщений,
+                        с ошибкой было детектировано всего {{ percent_errors }}%, что соответствует условию
+                        'около 0.5%'. Зафиксируйте полученный результат.
+                    </p>
                 </div>
                 <p>Нажмите на кнопку ниже, чтобы перейти к выполнению следующего задания.</p>
                 <div class="text-center mt-2">
@@ -59,7 +63,11 @@
                     {% endif %}
                 </div>
                 <div class="card-content-info">
-                    <p class="text-indent">{{ result_text }}</p>
+                    <p class="text-indent">
+                        Продолжайте подбирать SNR. Из 1000 переданных сообщений с ошибкой было детектировано
+                        {{ percent_errors }}%, а вам необходимо подобрать такое SNR, при котором вероятность
+                        детектирования сообщения с ошибкой будет 'около 0.5%'
+                    </p>
                 </div>
                 <form method="POST">
                     {% csrf_token %}
