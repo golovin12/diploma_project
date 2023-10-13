@@ -18,7 +18,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 
 from modulation_script import QAMModem, PSKModem
 from .forms import StudentForm, DemodulateInfluenceSNRFrom
-from .models import Student
+from .models import Student, StudentLab1
 from .utils import convert_base, for_test, for_lab2, sozvezd
 
 warnings.filterwarnings('ignore')
@@ -163,28 +163,16 @@ def lab1_example(request: WSGIRequest):
 @require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory1(request: WSGIRequest):
-    # todo Храним инфо о юзере. Все картинки удалям спустя время/сразу
     form = DemodulateInfluenceSNRFrom
     if request.method == "POST":
         form = form(request.POST)
         if form.is_valid():
-            errors_percent = form.calculate_percent()
-            # Формирование вывода о влиянии SNR на выбранный тип модуляции
-            if 0 < errors_percent <= 1:
-                is_complete = True
-                result_text = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектировании 1000 " \
-                              "сообщений, с ошибкой было детектировано всего {}%, что соответствует условию 'около " \
-                              "0.5%'. Зафиксируйте полученный результат"
-            else:
-                is_complete = False
-                result_text = "Продолжайте подбирать SNR. Из 1000 переданных сообщений с ошибкой было детектировано " \
-                              "{}%, а вам необходимо подобрать такое SNR, при котором вероятность детектирования " \
-                              "сообщения с ошибкой будет 'около 0.5%'"
-            result_text = result_text.format(errors_percent)
-            return render(request, 'detect/laboratory1.html',
-                          context={"form": form,
-                                   "result_text": result_text,
-                                   "is_complete": is_complete})
+            student = request.user
+            data = form.get_context_data()
+            if data['is_complete']:
+                StudentLab1.objects.get_or_create(student=student, modulation=data['modulation'], is_complete=True)
+            data['form'] = form
+            return render(request, 'detect/laboratory1.html', context=data)
     return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
 
 

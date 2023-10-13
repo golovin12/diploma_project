@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
@@ -16,6 +17,7 @@ class Student(AbstractBaseUser):
     name = models.CharField(max_length=200, verbose_name='Имя')
     surname = models.CharField(max_length=200, verbose_name='Фамилия')
     group = models.CharField(max_length=20, verbose_name='Группа')
+    is_admin = models.BooleanField('Админ', default=False)
 
     USERNAME_FIELD = 'username'
 
@@ -26,11 +28,31 @@ class Student(AbstractBaseUser):
     def __str__(self):
         return f'{self.group}: {self.surname} {self.name}'
 
+    def lab1_is_complete(self):
+        if self.studentlab1_set.filter(is_complete=True).count() >= 3:
+            return True
+        return False
+
+    def lab2_is_complete(self):
+        if self.studentlab2_set.filter(is_complete=True).count() >= 3:
+            return True
+        return False
+
+    def lab3_is_complete(self):
+        if self.studentlab3_set.filter(is_complete=True).count() >= 3:
+            return True
+        return False
+
+    def lab4_is_complete(self):
+        if self.studentlab4.is_complete:
+            return True
+        return False
+
 
 class Question(models.Model):
     name = models.CharField(max_length=255, verbose_name='Вопрос')
     image = models.ImageField(verbose_name='Картинка к вопросу', max_length=200, blank=True,
-                              upload_to='models.Question.image/')
+                              upload_to='detect/models.Question.image/')
 
     class Meta:
         verbose_name = 'Вопрос'
@@ -54,7 +76,7 @@ class StudentTest(models.Model):
     test_percent = models.DecimalField(verbose_name='Процент выполнения теста', max_digits=5, decimal_places=2,
                                        default=0)
     attempts = models.PositiveIntegerField(verbose_name='Количество попыток', default=0, blank=True)
-    end_dt = models.DateTimeField(verbose_name='Время окончания', default=timezone.now, blank=True)
+    end_dt = models.DateTimeField(verbose_name='Время окончания', null=True, blank=True)
 
     class Meta:
         ordering = ('-end_dt',)
@@ -75,9 +97,9 @@ class StudentLab2(models.Model):
     modulation = models.CharField(verbose_name='Тип модуляции', max_length=7, choices=modulation_choices)
     signal = models.CharField(verbose_name='Сигнал', max_length=8, validators=[signal_validator])
     signal_image = models.ImageField(verbose_name='Изображение сигнала', max_length=200, blank=True,
-                                     upload_to='models.StudentLab2.signal_image/%Y/')
+                                     upload_to='detect/models.StudentLab2.signal_image/%Y/')
     stars_image = models.ImageField(verbose_name='Сигнальное созвездие', max_length=200, blank=True,
-                                    upload_to='models.StudentLab2.stars_image/%Y/')
+                                    upload_to='detect/models.StudentLab2.stars_image/%Y/')
     is_complete = models.BooleanField(default=False, verbose_name='Детектирован',
                                       help_text='Становится True если сигнал детектирован')
 
@@ -95,9 +117,21 @@ class StudentLab4(models.Model):
     signal = models.CharField(verbose_name='Сигнал', max_length=96, validators=[signal_validator])
     signal_complex = models.CharField(verbose_name='Сигнал в виде комплексных чисел', max_length=4000)
     signal_image = models.ImageField(verbose_name='Изображение сигнала', max_length=200, blank=True,
-                                     upload_to='models.StudentLab4.signal_image/%Y/')
+                                     upload_to='detect/models.StudentLab4.signal_image/%Y/')
     is_complete = models.BooleanField(default=False, verbose_name='Детектирован',
                                       help_text='Становится True если сигнал детектирован')
+
+
+class Modulation(models.Model):
+    method = models.CharField(verbose_name='Тип модуляции', max_length=7, choices=modulation_choices)
+    stars_image = models.ImageField(verbose_name='Сигнальное созвездие', max_length=200, blank=True,
+                                    upload_to='detect/models.Modulation.stars_image/')
+
+
+class TemporaryImage(models.Model):
+    create_dt = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(verbose_name='Изображение', max_length=200, blank=True,
+                              upload_to='detect/models.TemporaryImage.image/%Y/')
 
 
 class PageData(models.Model):

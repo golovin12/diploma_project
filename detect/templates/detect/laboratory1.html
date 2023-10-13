@@ -3,45 +3,47 @@
 {% load static %}
 
 {% block content %}
-    {% firstof form.modulation.value as modulation %}
-    {% firstof form.snr.value as snr %}
+    {% if request.user.lab1_is_complete %}
+        <div class="card-info-bold">
+            Вы успешно подобрали SNR для 3 видов сигналов, можете перейти к следующей практике!
+        </div>
+    {% endif %}
     <div class="card-content">
         <p class="text-center font-weight-bold h3">Практическое задание 1</p>
         <p class="text-center font-weight-bold h4">"Изучение влияния SNR на качество детектирования"</p>
         <div class="card-content-body">
             <p id="u3870-311">Выбранный тип модуляции: {{ modulation }}</p>
-            <p>Исходное сообщение, которое будет передаваться по каналу связи: {{ form.original_message }}</p>
+            <p>Исходное сообщение, которое будет передаваться по каналу связи: {{ original_message }}</p>
             <p>Это сообщение поступает на передающее устройство.</p>
             <p>Внешний вид сообщения после манипуляции {{ modulation }} представлен на рисунке 1.</p>
-            <img class="bordered-image" src="{{ form.path_to_orig_message }}" alt="{{ form.path_to_orig_message }}"/>
+            <img class="bordered-image" src="{{ path_to_modulated_signal }}" alt="{{ path_to_modulated_signal }}"/>
             <p class="image-caption">Рисунок 1 - Внешний вид сообщения после манипуляции {{ modulation }}</p>
             <p>Далее этот сигнал передается по каналу связи. В процессе передачи к сигналу добавляются шумы (отношение
                 Сигнал/Шум SNR={{ snr }} дБ). На приёмном устройстве, сигнал, после прохождения через принимающий
                 фильтр, примет вид, изображенный на рисунке 2.</p>
-            <img class="bordered-image" src="{{ form.path_to_message_with_gauss }}" alt="{{ form.path_to_message_with_gauss }}"/>
+            <img class="bordered-image" src="{{ path_to_signal_with_gauss }}" alt="{{ path_to_signal_with_gauss }}"/>
             <p class="image-caption">Рисунок 2 - Внешний вид сообщения после манипуляции {{ modulation }} при
                 SNR={{ snr }} дБ</p>
             <p><a class="link-red" href="##" onclick="collapse('OBL')">Сигнальное созвездие, по которому
                 определяется выходное сообщение, для данного типа манипуляции представлено на рисунке 3: (нажмите, чтобы
                 посмотреть)</a></p>
             <div id="OBL" style="display:none">
-                <img class="bordered-image" src="{{ form.path_to_modulation_img }}" alt="{{ form.path_to_modulation_img }}"/>
+                <img class="bordered-image" src="{{ modulation_image_path }}" alt="{{ modulation_image_path }}"/>
                 <p class="image-caption">Рисунок 3 - Сигнальное созвездие для {{ modulation }} манипуляции</p>
             </div>
             <p>После этапа преобразования сигнала в выборку, происходит процесс детектирования. Сообщение, полученное
                 после детектирования:</p>
-            <p>{{ form.demodulated_message }}</p>
+            <p>{{ demodulated_message }}</p>
             <p>Для сравнения - исходное сообщение:</p>
-            <p>{{ form.original_message }}</p>
+            <p>{{ original_message }}</p>
             {% if is_complete %}
                 <div class="card-content-info">
                     <p class="text-indent">{{ result_text }}</p>
                 </div>
                 <p>Нажмите на кнопку ниже, чтобы перейти к выполнению следующего задания.</p>
                 <div class="text-center mt-2">
-                    <a class="orange-button" href="{% url 'detect:laboratory2' %}">К заданию 2</a>
+                    <a class="orange-button" href="{% url 'detect:laboratory1' %}">Вернуться к заданию 1</a>
                 </div>
-                {# todo не ясно, мб надо к лабе 1 #}
             {% else %}
                 <p>Как видно из рассуждений выше SNR = {{ snr }} дБ не подходит для выполнения условий
                     при {{ modulation }} манипуляции. Рассчитайте какое должно быть SNR (формулы для

@@ -130,6 +130,11 @@ else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'var/static/')
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
+# Файловое хранилище
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'  # django-storages
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')  # Absolute filesystem path to dir that will hold user-uploaded files.
+MEDIA_URL = '/media/'  # URL that handles the media served from MEDIA_ROOT, see accounts.media_file
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 

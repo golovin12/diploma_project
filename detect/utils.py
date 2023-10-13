@@ -1,3 +1,4 @@
+import io
 import math, cmath
 import random
 import uuid
@@ -5,9 +6,8 @@ import uuid
 import numpy as np
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
-from numba import jit
 
-from modulation_script import QAMModem, PSKModem
+from modulation_script import QAMModem, PSKModem, Modem
 
 
 def convert_base(num, to_base=2, from_base=2):
@@ -69,13 +69,8 @@ def for_test(file_name, kolich):
     return zagolovok, voprosi, otveti
 
 
-def graf(modem, modulation: str, modulation_position: int):
-    """
-    Построение графиков для разных типов манипуляции
-
-    * Сейчас не используется, т.к. используемые виды манипуляций известны и для них графики уже построены
-    """
-    b = "static/detect/graph/" + modulation + ".png"
+def get_modulation_graph(modem: Modem, modulation_position: int, modulation: str) -> io.BytesIO:
+    """Построение графика для выбранного типа модуляции"""
     fig, ax = plt.subplots()
     modem.plot_constellation(modulation_position)
     if modulation_position == 2:
@@ -90,100 +85,57 @@ def graf(modem, modulation: str, modulation_position: int):
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
     plt.title(modulation + " модуляция")
-    plt.savefig(b)
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
     plt.close()
-    return b
+    return buf
 
 
-@jit(nopython=True)
-def soobhenie(c, t_modulat):
-    """Функция для ускорения расчёта процента"""
-    soobh = []
-    for i in range(c):
-        k = np.log2(t_modulat)
-        if k == 1:
-            for j in range(8):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        elif k == 2:
-            for j in range(10):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        elif k == 3:
-            for j in range(12):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        elif k == 4:
-            for j in range(16):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        elif k == 5:
-            for j in range(20):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        elif k == 6:
-            for j in range(24):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        elif k == 7:
-            for j in range(28):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        else:
-            for j in range(32):
-                soobh.append(np.random.randint(0, 2, 1)[0])
-        return soobh
+def get_random_message(modulation_position: int):
+    k = int(math.log2(modulation_position))
+    if k <= 3:
+        multiplier = 6 + 2 * k
+    elif k <= 7:
+        multiplier = 4 * k
+    else:
+        multiplier = 32
+    return [random.choice((0, 1)) for i in range(multiplier)]
 
 
-@jit(nopython=True)
-def dem(demodulated):
-    """Функция для ускорения расчёта процента"""
-    d = []
-    for i in demodulated:
-        d.append(i)
-    return d
-
-
-def for_percent(c, modem, t_modulat, snr):
+def get_signals(modem: Modem, modulation_position: int,
+                snr: float) -> tuple[list, list, np.ndarray[np.complex_], np.ndarray[np.complex_]]:
     """
     Генерация сигнала, модулированного сигнала, сигнала, подверженного гауссовскому шуму и детектированного сигнала
     """
-    n = int(t_modulat)
-    soobh = soobhenie(c, n)
-    modulated = modem.modulate(soobh)
-    t = awgn(modulated, snr)
-    demodulated = modem.demodulate(t, 'hard')
-    d = dem(demodulated)
-    if c == 10:
-        if d == soobh:
-            return "y"
-        else:
-            return "n"
-    else:
-        return soobh, d, modulated, t
+    original_message = get_random_message(modulation_position)
+    modulated_signal = modem.modulate(original_message)
+    gaussian_signal = awgn(modulated_signal, snr)
+    demodulated_message = [i for i in modem.demodulate(gaussian_signal, 'hard')]
+    return original_message, demodulated_message, modulated_signal, gaussian_signal
 
 
-def for_lab1(a, folder):
-    """
-    Построение графика модулированного сигнала и сигнала, пропущенного через шум; вывод пути до построенных графиков
-    """
-    vih = []
-    for signal in a:
-        fig, ax = plt.subplots()
-        mr = 0
-        for i in range(len(signal)):
-            element = signal[i]
-            g = np.linspace(mr, mr + 8 * math.pi, 200)
-            mr += 8 * math.pi
-            cel = math.sqrt(2) * math.sqrt((element.real) ** 2 + (element.imag) ** 2)
-            fas = cmath.phase(element)
-            u = cel * np.sin(g + fas)
-            if i + 1 < len(signal):
-                plt.plot([mr, mr], [cel * np.sin(fas), math.sqrt(2) * math.sqrt(
-                    (signal[i + 1].real) ** 2 + (signal[i + 1].imag) ** 2) * np.sin(
-                    cmath.phase(signal[i + 1]))], color='k')
-            plt.plot(g, u)
-        plt.grid()
-        ax.set_xlabel('Время, с')
-        ax.set_ylabel('Амплитуда, В')
-        file_name = uuid.uuid4()
-        plt.savefig(f"detect/static/detect/{folder}/{file_name}.png")
-        plt.close()
-        vih.append(file_name)
-    return vih
+def get_signal_image(signal: np.ndarray[np.complex_]) -> io.BytesIO:
+    """Построение графиков сигналов; вывод пути до построенных графиков"""
+    fig, ax = plt.subplots()
+    mr = 0
+    for next_index, complex_number in enumerate(signal, start=1):
+        g = np.linspace(mr, mr + 8 * math.pi, 200)
+        mr += 8 * math.pi
+        cel = math.sqrt(2) * math.sqrt(complex_number.real ** 2 + complex_number.imag ** 2)
+        fas = cmath.phase(complex_number)
+        u = cel * np.sin(g + fas)
+        if next_index < len(signal):
+            plt.plot([mr, mr], [cel * np.sin(fas), math.sqrt(2) * math.sqrt(
+                signal[next_index].real ** 2 + signal[next_index].imag ** 2) * np.sin(
+                cmath.phase(signal[next_index]))], color='k')
+        plt.plot(g, u)
+    plt.grid()
+    ax.set_xlabel('Время, с')
+    ax.set_ylabel('Амплитуда, В')
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close()
+    return buf
 
 
 def for_lab2(a, folder):

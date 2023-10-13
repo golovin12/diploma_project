@@ -5,3 +5,5 @@ if Student.objects.count() > 100:
         Person.objects.filter(id=g).delete()
 
 # todo через 2 дня удалять все media
+
+# todo Удалять старых юзеров (по last_joined)

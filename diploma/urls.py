@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls import url
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.views.static import serve
 from django.urls import path, include
@@ -27,7 +28,7 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/detect/'), name="home"),
     path('admin/', admin.site.urls),
     path('detect/', include('detect.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler500 = views.m500
 handler410 = views.m410

@@ -3,6 +3,11 @@
 {% load static %}
 
 {% block content %}
+    {% if request.user.lab1_is_complete %}
+        <div class="card-info-bold">
+            Вы успешно подобрали SNR для 3 видов сигналов, можете перейти к следующей практике!
+        </div>
+    {% endif %}
     <div class="card-content">
         <p class="text-center font-weight-bold h3">Практическое задание 1 (пример выполнения)</p>
         <p class="text-center font-weight-bold h4">"Изучение влияния SNR на качество детектирования"</p>
