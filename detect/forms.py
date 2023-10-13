@@ -39,7 +39,7 @@ class DemodulateInfluenceSNRFrom(forms.Form):
     def path_to_message_with_gauss(self):
         return self._path_to_message_with_gauss
 
-    def calculate_percent(self):
+    def calculate_percent(self) -> float:
         """Эмулирует процесс демодуляции сообщений и возвращает процент успешно демодулированных сообщений из 1000"""
         # К юзеру привязывается лаба.
         # В этой лабе сохраняются картинки последних сигналов (старые - удаляются) !!!Для каждой модуляции!!!.

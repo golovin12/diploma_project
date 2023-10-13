@@ -31,7 +31,7 @@ def home_page(request: WSGIRequest):
 
 
 @require_GET
-def theory1(request):
+def theory1(request: WSGIRequest):
     with open('theory/theory1.txt', 'r', encoding='UTF-8') as f:
         text = f.readlines()
     data = {"header": "1. Общие сведения о задаче детектирования",
@@ -40,9 +40,9 @@ def theory1(request):
 
 
 @require_GET
-def theory2(request):
-    with open('theory/theory2.txt', 'r', encoding='UTF-8') as f:
-        text = f.readlines()
+def theory2(request: WSGIRequest):
+    with open('theory/theory2.txt', 'r', encoding='UTF-8') as file:
+        text = file.readlines()
     data = {"header": "2. Классификация методов детектирования",
             "text": text
             }
@@ -50,9 +50,9 @@ def theory2(request):
 
 
 @require_GET
-def theory3(request):
-    with open('theory/theory3.txt', 'r', encoding='UTF-8') as f:
-        text = f.readlines()
+def theory3(request: WSGIRequest):
+    with open('theory/theory3.txt', 'r', encoding='UTF-8') as file:
+        text = file.readlines()
     data = {"header": "3. Перспективы развития методов детектирования",
             "text": text
             }
@@ -63,6 +63,7 @@ def theory3(request):
 @never_cache
 def result_is_db(request: WSGIRequest):
     """Возвращает информацию о статусе выполнения заданий студентами"""
+    # todo отображать прогресс по лабам и тесту в виде таблицы.
     page_number = request.GET.get('page')
     students = Student.objects.all()
     paginator = Paginator(students, 50)
@@ -78,8 +79,8 @@ def result_is_db(request: WSGIRequest):
 
 @require_http_methods(["GET", "POST"])
 @never_cache
-def final_test(request):
-    # Выводит Тестовые вопросы, просит пользователя авторизоваться и, при успешном выполнении теста, выводит результат.
+def final_test(request: WSGIRequest):
+    # todo привязать набор вопросов к пользователю
     global otveti_for_users
     c = 0
     userform = UserForm()  # Создаются поля для ввода Имени, Фамилии и Группы
@@ -136,6 +137,7 @@ def lab1_example(request: WSGIRequest):
 @require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory1(request: WSGIRequest):
+    # todo Храним инфо о юзере. Все картинки удалям спустя время/сразу
     form = DemodulateInfluenceSNRFrom
     if request.method == "POST":
         form = form(request.POST)
@@ -161,8 +163,9 @@ def laboratory1(request: WSGIRequest):
 
 
 @never_cache
-def laboratory2(request):
-    global file_lab2, file_sozvezd2
+def laboratory2(request: WSGIRequest):
+    # Для каждого студента генерируем свой набор сигналов и изображений и работаем только с ним.
+    # Пример выносим из бэка
     if request.method == "POST":
         prov1 = convert_base(request.POST.get("prov1"), 2, 17)
         prov1 = prov1[::-1][3:][:-3]
@@ -228,7 +231,9 @@ def laboratory2(request):
 
 
 @never_cache
-def laboratory3(request):
+def laboratory3(request: WSGIRequest):
+    # Для каждого студента генерируем свой набор сигналов и работаем только с ним.
+    # Пример выносим из бэка
     if request.method == "POST":
         mess1 = convert_base(request.POST.get("mess1"), 2, 21)
         mess1 = mess1[::-1][7:][:-6]
@@ -288,7 +293,9 @@ def laboratory3(request):
 
 
 @never_cache
-def laboratory4(request):
+def laboratory4(request: WSGIRequest):
+    # Для каждого студента генерируем свой сигнал и работаем только с ним.
+    # Пример выносим из бэка
     if request.method == "POST":
         vihod = request.POST.get("vihod")
         vihod = convert_base(vihod, 2, 20)[::-1][3:][:-3]
@@ -301,7 +308,7 @@ def laboratory4(request):
     else:
         # Формирование сигнала и OFDM-модуляция
         msg = []
-        for i in range(100):
+        for i in range(96):
             msg.append(random.choice([0, 1]))
         modem1 = PSKModem(4)
         msg1 = []
@@ -341,7 +348,7 @@ def laboratory4(request):
         for_demod2 = []
         for_demod3 = []
         for_demod4 = []
-        for i in range(0, int(len(of_for_priem)), 4):
+        for i in range(0, len(of_for_priem), 4):
             for_demod1.append(of_for_priem[i])
             for_demod2.append(of_for_priem[i + 1])
             for_demod3.append(of_for_priem[i + 2])

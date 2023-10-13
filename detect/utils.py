@@ -1,4 +1,5 @@
 import math, cmath
+import random
 import uuid
 
 import numpy as np
@@ -10,7 +11,7 @@ from modulation_script import QAMModem, PSKModem
 
 
 def convert_base(num, to_base=2, from_base=2):
-    # Функция для перевода из одной системы счисления в другую.
+    """Функция для перевода из одной системы счисления в другую."""
     if isinstance(num, str):
         n = int(num, from_base)
     else:
@@ -22,13 +23,11 @@ def convert_base(num, to_base=2, from_base=2):
         return convert_base(n // to_base, to_base) + alphabet[n % to_base]
 
 
-# ФУНКЦИИ ДЛЯ ТЕСТА
-
-
-# Функция принимает список вопросов с ответами, перемешивает вопросы
-# Выводит пользователю запрашиваемое количество вопросов и отдельно ответы к ним
 def vibor(spisok, kolich):
-    import random
+    """
+    Функция принимает список вопросов с ответами, перемешивает вопросы.
+    Выводит пользователю запрашиваемое количество вопросов и отдельно ответы к ним
+    """
     voprosi = []
     otveti = []
     random.shuffle(spisok)  # Перемешивает поступивший набов вопросов
@@ -50,28 +49,32 @@ def vibor(spisok, kolich):
     return voprosi, otveti  # Выводится полученные наборы вопросов и ответов, при этом, индексы каждого вопроса совпадают с индексами ответов для этих вопросов
 
 
-# Функция для чтения файла и последующего вывода заголовка, списка вопросов и отдельо ответов к ним
 def for_test(file_name, kolich):
+    """Функция для чтения файла и последующего вывода заголовка, списка вопросов и отдельно ответов к ним"""
     vopr, otveti = [], []
     with open(file_name, 'r', encoding='UTF-8') as f:  # Читаю файл с вопросами
         zagolovok = f.readline()  # Извлекаю первую строку (заголовок вопросника) из файла
         while True:
             v = []
-            for i in range(
-                    7):  # Из файла извлекаю наборы вопросов (Вопрос, 4 варианта ответов, путь к рисунку, правльный ответ)
+            for i in range(7):
+                # Из файла извлекаю наборы вопросов (Вопрос, 4 варианта ответов, путь к рисунку, правильный ответ)
                 v.append(f.readline())
             f.readline()
             if v[0] == '' or v[0] == '\n':  # Когда заканчиваются вопросы, останавливаю цикл
                 break
             else:
                 vopr.append(v)  # Если вопросы не закончились, то добавляю полученный набор в общий список вопросов
-        voprosi, otveti = vibor(vopr, kolich)  # Отправляю блоки вопросов для перемешивания
-    return zagolovok, voprosi, otveti  # Вывожу заголовок, Вопросы и ответы (индексы Вопросов совпадают с индексами ответов к этим вопросам)
+    voprosi, otveti = vibor(vopr, kolich)  # Отправляю блоки вопросов для перемешивания
+    # Вывожу заголовок, Вопросы и ответы (индексы Вопросов совпадают с индексами ответов к этим вопросам)
+    return zagolovok, voprosi, otveti
 
 
-# ФУНКИИ ДЛЯ ПРАКТИЧЕСКОЙ ЧАСТИ
-# Построение графиков области решений и вывод пути для них
 def graf(modem, modulation: str, modulation_position: int):
+    """
+    Построение графиков для разных типов манипуляции
+
+    * Сейчас не используется, т.к. используемые виды манипуляций известны и для них графики уже построены
+    """
     b = "static/detect/graph/" + modulation + ".png"
     fig, ax = plt.subplots()
     modem.plot_constellation(modulation_position)
@@ -92,9 +95,9 @@ def graf(modem, modulation: str, modulation_position: int):
     return b
 
 
-# Функция для ускорения расчёта процента
 @jit(nopython=True)
 def soobhenie(c, t_modulat):
+    """Функция для ускорения расчёта процента"""
     soobh = []
     for i in range(c):
         k = np.log2(t_modulat)
@@ -125,17 +128,19 @@ def soobhenie(c, t_modulat):
         return soobh
 
 
-# Функция для ускорения расчёта процента
 @jit(nopython=True)
 def dem(demodulated):
+    """Функция для ускорения расчёта процента"""
     d = []
     for i in demodulated:
         d.append(i)
     return d
 
 
-# Генерация сигнала, модулированного сигнала, сигнала, подверженного гауссовскому шуму и детектированного сигнала
 def for_percent(c, modem, t_modulat, snr):
+    """
+    Генерация сигнала, модулированного сигнала, сигнала, подверженного гауссовскому шуму и детектированного сигнала
+    """
     n = int(t_modulat)
     soobh = soobhenie(c, n)
     modulated = modem.modulate(soobh)
@@ -151,8 +156,10 @@ def for_percent(c, modem, t_modulat, snr):
         return soobh, d, modulated, t
 
 
-# Построение графика модулированного сигнала и сигнала, пропущенного через шум; вывод пути до построенных графиков
 def for_lab1(a, folder):
+    """
+    Построение графика модулированного сигнала и сигнала, пропущенного через шум; вывод пути до построенных графиков
+    """
     vih = []
     for signal in a:
         fig, ax = plt.subplots()
