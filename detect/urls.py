@@ -14,7 +14,7 @@ urlpatterns = [
     path('laboratory/1/', views.laboratory1, name="laboratory1"),
     path('laboratory/2/', views.laboratory2, name="laboratory2"),
     path('laboratory/3/', views.laboratory3, name="laboratory3"),
-    path('laboratory/4/', views.laborathory4, name="laboratory4"),
+    path('laboratory/4/', views.laboratory4, name="laboratory4"),
     path('test/', views.final_test, name="final_test"),
     path('result_is_db/', views.result_is_db, name="result"),
 ]

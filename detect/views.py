@@ -1,4 +1,5 @@
 import random
+import uuid
 import warnings
 
 import matplotlib.pyplot as plt
@@ -286,25 +287,8 @@ def laboratory3(request):
         return render(request, 'detect/laboratory3.html', context={"spisok": spisok, "mess": mess})
 
 
-# Запоминает вопросы пользователя
-otveti_for_users = []
-otveti_slovar = {}
-file_lab4 = []
-
-
-def znach(voprosi, otveti):
-    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
-    global otveti_slovar
-    t = random.randint(-99999999, 99999999)
-    while otveti_slovar.get(str(t)) != None:
-        t = random.randint(-99999999, 99999999)
-    otveti_slovar[str(t)] = [voprosi, otveti]
-    return str(t)
-
-
 @never_cache
-def laborathory4(request):
-    global file_lab4
+def laboratory4(request):
     if request.method == "POST":
         vihod = request.POST.get("vihod")
         vihod = convert_base(vihod, 2, 20)[::-1][3:][:-3]
@@ -347,16 +331,10 @@ def laborathory4(request):
         signal = []
         for i in of_for_priem:
             signal.append(i)
-        if len(file_lab4) <= 50:
-            put = str(len(file_lab4))
-            file_lab4.append(put)
-        else:
-            file_lab4 = []
-            put = str(len(file_lab4))
-            file_lab4.append(put)
+        file_name = uuid.uuid4()
         plt.plot(of_for_priem)
         plt.grid()
-        plt.savefig("static/lab4/" + put + ".png")
+        plt.savefig(f"detect/static/detect/lab4/{file_name}.png")
         plt.close()
         # OFDM-демодуляция
         for_demod1 = []
@@ -383,4 +361,19 @@ def laborathory4(request):
             vihod += str(i)
         vihod = "101" + vihod[::-1] + "011"
         vihod = convert_base(vihod, 20, 2)
-        return render(request, 'detect/laborathory4.html', context={"put": put, "signal": signal, "vihod": vihod})
+        return render(request, 'detect/laboratory4.html', context={"put": file_name, "signal": signal, "vihod": vihod})
+
+
+# Запоминает вопросы пользователя
+otveti_for_users = []
+otveti_slovar = {}
+
+
+def znach(voprosi, otveti):
+    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
+    global otveti_slovar
+    t = random.randint(-99999999, 99999999)
+    while otveti_slovar.get(str(t)) != None:
+        t = random.randint(-99999999, 99999999)
+    otveti_slovar[str(t)] = [voprosi, otveti]
+    return str(t)
