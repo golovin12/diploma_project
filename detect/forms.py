@@ -2,6 +2,7 @@ from django import forms
 
 from modulation_script import QAMModem, PSKModem
 from .consts import modulation_choices
+from .models import Student
 from .utils import for_percent, for_lab1
 
 
@@ -73,7 +74,16 @@ class DemodulateInfluenceSNRFrom(forms.Form):
         return round(100 - a * 100 / 1000, 3)
 
 
-class UserForm(forms.Form):
-    name = forms.CharField(label="Имя", min_length=2, max_length=20)
-    family = forms.CharField(label="Фамилия", min_length=3, max_length=20)
-    group = forms.CharField(label="Группа", min_length=2, max_length=20)
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ('name', 'surname', 'group')
+
+    def get_user(self):
+        name = self.cleaned_data['name']
+        surname = self.cleaned_data['surname']
+        group = self.cleaned_data['group']
+        student = Student.objects.filter(name__iexact=name, surname__iexact=surname, group__iexact=group).first()
+        if student:
+            return student
+        return Student.objects.create(name=name.capitalize(), surname=surname.capitalize(), group=group.upper())

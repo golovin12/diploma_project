@@ -6,6 +6,8 @@ app_name = "detect"
 
 urlpatterns = [
     path('', views.home_page, name="home"),
+    path('student_login/', views.student_login, name="student_login"),
+    path('student_logout/', views.student_logout, name="student_logout"),
     path('theory/', views.theory1, name="theory_list"),
     path('theory/1/', views.theory1, name="theory1"),
     path('theory/2/', views.theory2, name="theory2"),

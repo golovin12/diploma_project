@@ -6,8 +6,19 @@
 {% endblock %}
 
 {% block navbar-links %}
-    <li><a href="{% url 'detect:home' %}">Главная</a></li>
-    <li><a href="{% url 'detect:theory_list' %}">Теория</a></li>
-    <li><a href="{% url 'detect:lab1_example' %}">Практические задания</a></li>
-    <li><a href="{% url 'detect:final_test' %}">Тестирование</a></li>
+    <li><a class="navbar-link" href="{% url 'detect:home' %}">Главная</a></li>
+    <li><a class="navbar-link" href="{% url 'detect:theory_list' %}">Теория</a></li>
+    <li><a class="navbar-link" href="{% url 'detect:lab1_example' %}">Практические задания</a></li>
+    <li><a class="navbar-link" href="{% url 'detect:final_test' %}">Тестирование</a></li>
+{% endblock %}
+
+{% block navbar-right %}
+    {% if request.user.name %}
+        <div class="navbar-right">
+            <div>
+                {{ request.user.group }}<br>{{ request.user.name }}<br>{{ request.user.surname }}
+            </div>
+            <a href="{% url 'detect:student_logout' %}">Выйти</a>
+        </div>
+    {% endif %}
 {% endblock %}

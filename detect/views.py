@@ -6,18 +6,41 @@ import matplotlib.pyplot as plt
 from commpy.channels import awgn
 from scipy.fft import fft, ifft
 
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import Paginator
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 
 from modulation_script import QAMModem, PSKModem
-from .forms import UserForm, DemodulateInfluenceSNRFrom
+from .forms import StudentForm, DemodulateInfluenceSNRFrom
 from .models import Student
 from .utils import convert_base, for_test, for_lab2, sozvezd
 
 warnings.filterwarnings('ignore')
+
+
+@require_http_methods(["GET", "POST"])
+def student_login(request: WSGIRequest):
+    next_page = request.GET.get('next')
+    form = StudentForm
+    if request.method == "POST":
+        form = form(request.POST)
+        if form.is_valid():
+            student = form.get_user()
+            login(request, student)
+            return HttpResponseRedirect(next_page or reverse('detect:lab1_example'))
+    return render(request, 'detect/login.html', {'form': form})
+
+
+@require_http_methods(["GET", "POST"])
+def student_logout(request: WSGIRequest):
+    logout(request)
+    return HttpResponseRedirect(reverse('detect:home'))
 
 
 @require_GET
@@ -77,13 +100,14 @@ def result_is_db(request: WSGIRequest):
     return render(request, 'detect/result_is_db.html', context={"spisok": students_results})
 
 
+@login_required(login_url="/detect/student_login/")
 @require_http_methods(["GET", "POST"])
 @never_cache
 def final_test(request: WSGIRequest):
     # todo привязать набор вопросов к пользователю
     global otveti_for_users
     c = 0
-    userform = UserForm()  # Создаются поля для ввода Имени, Фамилии и Группы
+    form = StudentForm()  # Создаются поля для ввода Имени, Фамилии и Группы
     if request.method == "POST":  # Проверяется, вводил ли пользователь свои данные и ответил ли на вопросы
         # Т.к. изначально при входе на страницу ничего не введено, то эта функция вызывается после else (поэтому сначала надо смотреть на работу этого пункта)
         name = request.POST.get("name")
@@ -116,7 +140,7 @@ def final_test(request: WSGIRequest):
             otveti_for_users.append(pk)
             result = "Вы прошли тест на: {}%. Попробуйте ещё раз!".format(test_percent)
             return render(request, 'detect/final_test.html',
-                          context={"zagolovok": zagolovok, "voprosi": voprosi, "form": userform, "result": result,
+                          context={"zagolovok": zagolovok, "voprosi": voprosi, "form": form, "result": result,
                                    "id": pk})
     else:  # Когда пользователь только заходит на страницу теста, то для него формируются вопросы и ответы, которые запоминаются в функции func5
         zagolovok, voprosi, otveti = for_test('tests/test1.txt',
@@ -125,15 +149,17 @@ def final_test(request: WSGIRequest):
         otveti_for_users.append(pk)
         result = "Введите свои данные и проходите тест:"
         return render(request, 'detect/final_test.html',
-                      context={"zagolovok": zagolovok, "voprosi": voprosi, "form": userform, "result": result,
+                      context={"zagolovok": zagolovok, "voprosi": voprosi, "form": form, "result": result,
                                "id": pk})
 
 
+@login_required(login_url="/detect/student_login/")
 @require_GET
 def lab1_example(request: WSGIRequest):
     return render(request, 'detect/lab1_example.html', {'form': DemodulateInfluenceSNRFrom})
 
 
+@login_required(login_url="/detect/student_login/")
 @require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory1(request: WSGIRequest):
@@ -162,6 +188,7 @@ def laboratory1(request: WSGIRequest):
     return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
 
 
+@login_required(login_url="/detect/student_login/")
 @never_cache
 def laboratory2(request: WSGIRequest):
     # Для каждого студента генерируем свой набор сигналов и изображений и работаем только с ним.
@@ -230,6 +257,7 @@ def laboratory2(request: WSGIRequest):
         return render(request, 'detect/laboratory2.html', context={"d": det, "vih_put": vih_put, "put_sozv": put_sozv})
 
 
+@login_required(login_url="/detect/student_login/")
 @never_cache
 def laboratory3(request: WSGIRequest):
     # Для каждого студента генерируем свой набор сигналов и работаем только с ним.
@@ -292,6 +320,7 @@ def laboratory3(request: WSGIRequest):
         return render(request, 'detect/laboratory3.html', context={"spisok": spisok, "mess": mess})
 
 
+@login_required(login_url="/detect/student_login/")
 @never_cache
 def laboratory4(request: WSGIRequest):
     # Для каждого студента генерируем свой сигнал и работаем только с ним.

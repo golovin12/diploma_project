@@ -1,0 +1,18 @@
+{% extends "detect/base.html" %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block extrastyle %}
+    <link rel="stylesheet" href="{% static "detect/css/button.css" %}"/>
+{% endblock %}
+
+{% block content %}
+    <div class="card-content-info">
+        <div class="text-center font-weight-bold h3">Для продолжения работы необходимо ввести данные</div>
+        <form method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button class="orange-button" type="submit">Перейти к практике</button>
+        </form>
+    </div>
+{% endblock %}

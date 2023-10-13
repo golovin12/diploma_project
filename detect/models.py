@@ -1,14 +1,23 @@
+import uuid
+
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 
 from .consts import modulation_choices
 
+signal_validator = RegexValidator(r'^[0,1]*$')
 
-class Student(models.Model):
+
+class Student(AbstractBaseUser):
+    username = models.UUIDField('username', unique=True, default=uuid.uuid4)
+    password = models.CharField('password', max_length=128, blank=True, default='')
     name = models.CharField(max_length=200, verbose_name='Имя')
     surname = models.CharField(max_length=200, verbose_name='Фамилия')
     group = models.CharField(max_length=20, verbose_name='Группа')
+
+    USERNAME_FIELD = 'username'
 
     class Meta:
         verbose_name = 'Студент'
@@ -64,7 +73,7 @@ class StudentLab1(models.Model):
 class StudentLab2(models.Model):
     student = models.ForeignKey(Student, verbose_name='Студент', on_delete=models.CASCADE)
     modulation = models.CharField(verbose_name='Тип модуляции', max_length=7, choices=modulation_choices)
-    signal = models.CharField(verbose_name='Сигнал', max_length=8, validators=[RegexValidator(r'^[0,1]{8}$')])
+    signal = models.CharField(verbose_name='Сигнал', max_length=8, validators=[signal_validator])
     signal_image = models.ImageField(verbose_name='Изображение сигнала', max_length=200, blank=True,
                                      upload_to='models.StudentLab2.signal_image/%Y/')
     stars_image = models.ImageField(verbose_name='Сигнальное созвездие', max_length=200, blank=True,
@@ -75,7 +84,7 @@ class StudentLab2(models.Model):
 
 class StudentLab3(models.Model):
     student = models.ForeignKey(Student, verbose_name='Студент', on_delete=models.CASCADE)
-    signal = models.CharField(verbose_name='Сигнал', max_length=8, validators=[RegexValidator(r'^[0,1]{20,80}$')])
+    signal = models.CharField(verbose_name='Сигнал', max_length=80, validators=[signal_validator])
     signal_complex = models.CharField(verbose_name='Сигнал в виде комплексных чисел', max_length=3000)
     is_complete = models.BooleanField(default=False, verbose_name='Детектирован',
                                       help_text='Становится True если сигнал детектирован')
@@ -83,7 +92,7 @@ class StudentLab3(models.Model):
 
 class StudentLab4(models.Model):
     student = models.OneToOneField(Student, verbose_name='Студент', on_delete=models.CASCADE)
-    signal = models.CharField(verbose_name='Сигнал', max_length=8, validators=[RegexValidator(r'^[0,1]{96}$')])
+    signal = models.CharField(verbose_name='Сигнал', max_length=96, validators=[signal_validator])
     signal_complex = models.CharField(verbose_name='Сигнал в виде комплексных чисел', max_length=4000)
     signal_image = models.ImageField(verbose_name='Изображение сигнала', max_length=200, blank=True,
                                      upload_to='models.StudentLab4.signal_image/%Y/')
