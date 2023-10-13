@@ -14,7 +14,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 from modulation_script import QAMModem, PSKModem
 from .forms import UserForm, DemodulateInfluenceSNRFrom
 from .models import Student
-from .utils import convert_base, for_test, for_lab2
+from .utils import convert_base, for_test, for_lab2, sozvezd
 
 warnings.filterwarnings('ignore')
 
@@ -143,7 +143,7 @@ def laboratory1(request: WSGIRequest):
             # Формирование вывода о влиянии SNR на выбранный тип модуляции
             if 0 < errors_percent <= 1:
                 is_complete = True
-                result_text = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектирвоании 1000 " \
+                result_text = "Вы справились с заданием, вы подобрали такое SNR, при котором при детектировании 1000 " \
                               "сообщений, с ошибкой было детектировано всего {}%, что соответствует условию 'около " \
                               "0.5%'. Зафиксируйте полученный результат"
             else:
@@ -159,65 +159,8 @@ def laboratory1(request: WSGIRequest):
     return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
 
 
-# Запоминает вопросы пользователя
-otveti_for_users = []
-otveti_slovar = {}
-file_lab1 = []
-file_lab2 = []
-file_lab4 = []
-file_sozvezd2 = []
-
-
-def znach(voprosi, otveti):
-    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
-    global otveti_slovar
-    t = random.randint(-99999999, 99999999)
-    while otveti_slovar.get(str(t)) != None:
-        t = random.randint(-99999999, 99999999)
-    otveti_slovar[str(t)] = [voprosi, otveti]
-    return str(t)
-
-
-def sozvezd(soobh, t_modulat, modulat, put):
-    global file_sozvezd2
-    vih = []
-    fig, ax = plt.subplots()
-    g = int(t_modulat)
-    if modulat == "PSK":
-        modem = PSKModem(g)
-        m = "PSK модуляция"
-    else:
-        modem = QAMModem(g)
-        m = "QAM модуляция"
-    modem.plot_constellation(int(t_modulat))
-    if int(t_modulat) == 2:
-        plt.scatter(-0.5, 0.5, c='white', s=1)
-        plt.scatter(0.5, -0.5, c='white', s=1)
-    ax.set_xlabel('I (Синфазная ось)', labelpad=120)
-    ax.set_ylabel('Q (Квадратурная ось)', labelpad=160)
-    ax.spines['left'].set_position(('data', 0.0))
-    ax.spines['bottom'].set_position(('data', 0.0))
-    ax.spines['right'].set_color('none')
-    ax.spines['top'].set_color('none')
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
-    ax.axes.get_xaxis().set_ticklabels([])
-    ax.axes.get_yaxis().set_ticklabels([])
-    plt.title(str(t_modulat) + "-" + m)
-    for j in soobh:
-        plt.scatter(j.real, j.imag)
-    if len(file_sozvezd2) >= 52:
-        file_sozvezd2 = []
-    a = str(len(file_sozvezd2))
-    file_sozvezd2.append(a)
-    plt.savefig("static/" + put + "/" + file_sozvezd2[-1:][0] + "sozvezd.png")
-    plt.close()
-    vih.append(a)
-    return vih
-
-
 @never_cache
-def laborathory2(request):
+def laboratory2(request):
     global file_lab2, file_sozvezd2
     if request.method == "POST":
         prov1 = convert_base(request.POST.get("prov1"), 2, 17)
@@ -236,8 +179,7 @@ def laborathory2(request):
         if c == 3:
             result = "Вы успешно справились с заданием 2. Покажите результат преподавателю!"
         else:
-            result = "Вы не справились с заданием, попробуйте ещё раз! Вы правильно детектировали {} сигналов.".format(
-                c)
+            result = f"Вы не справились с заданием, попробуйте ещё раз! Вы правильно детектировали {c} сигналов."
         return render(request, 'detect/result.html', context={"result": result})
     else:
         d = []
@@ -281,11 +223,11 @@ def laborathory2(request):
         det[2] = convert_base(m2, 28, 2)
         m3 = "100" + det[3][::-1] + "001"
         det[3] = convert_base(m3, 23, 2)
-        return render(request, 'detect/laborathory2.html', context={"d": det, "vih_put": vih_put, "put_sozv": put_sozv})
+        return render(request, 'detect/laboratory2.html', context={"d": det, "vih_put": vih_put, "put_sozv": put_sozv})
 
 
 @never_cache
-def laborathory3(request):
+def laboratory3(request):
     if request.method == "POST":
         mess1 = convert_base(request.POST.get("mess1"), 2, 21)
         mess1 = mess1[::-1][7:][:-6]
@@ -341,7 +283,23 @@ def laborathory3(request):
         mess[0] = convert_base(mess[0], 21, 2)
         mess[1] = convert_base(mess[1], 24, 2)
         mess[2] = convert_base(mess[2], 22, 2)
-        return render(request, 'detect/laborathory3.html', context={"spisok": spisok, "mess": mess})
+        return render(request, 'detect/laboratory3.html', context={"spisok": spisok, "mess": mess})
+
+
+# Запоминает вопросы пользователя
+otveti_for_users = []
+otveti_slovar = {}
+file_lab4 = []
+
+
+def znach(voprosi, otveti):
+    # Функция принимает блок вопросов и ответов, сохраняет их под определённым id и отправляет этот id пользователю
+    global otveti_slovar
+    t = random.randint(-99999999, 99999999)
+    while otveti_slovar.get(str(t)) != None:
+        t = random.randint(-99999999, 99999999)
+    otveti_slovar[str(t)] = [voprosi, otveti]
+    return str(t)
 
 
 @never_cache

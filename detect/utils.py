@@ -179,10 +179,7 @@ def for_lab1(a, folder):
     return vih
 
 
-def for_lab2(a, put):
-    import math, cmath
-    import numpy as np
-    global file_lab2
+def for_lab2(a, folder):
     vih = []
     for signal in a:
         fig, ax = plt.subplots()
@@ -199,21 +196,17 @@ def for_lab2(a, put):
                     (signal[i + 1].real) ** 2 + (signal[i + 1].imag) ** 2) * np.sin(
                     cmath.phase(signal[i + 1]))], color='k')
             plt.plot(g, u)
-        if len(file_lab2) >= 52:
-            file_lab2 = []
-        a = str(len(file_lab2))
-        file_lab2.append(a)
+        file_name = uuid.uuid4()
         plt.grid()
         ax.set_xlabel('Время, с')
         ax.set_ylabel('Амплитуда, В')
-        plt.savefig("static/" + put + "/" + file_lab2[-1:][0] + ".png")
+        plt.savefig(f"detect/static/detect/{folder}/{file_name}.png")
         plt.close()
-        vih.append(a)
+        vih.append(file_name)
     return vih
 
 
-def sozvezd(soobh, t_modulat, modulat, put):
-    global file_sozvezd2
+def sozvezd(soobh, t_modulat, modulat, folder):
     vih = []
     fig, ax = plt.subplots()
     g = int(t_modulat)
@@ -240,11 +233,8 @@ def sozvezd(soobh, t_modulat, modulat, put):
     plt.title(str(t_modulat) + "-" + m)
     for j in soobh:
         plt.scatter(j.real, j.imag)
-    if len(file_sozvezd2) >= 52:
-        file_sozvezd2 = []
-    a = str(len(file_sozvezd2))
-    file_sozvezd2.append(a)
-    plt.savefig("static/" + put + "/" + file_sozvezd2[-1:][0] + "sozvezd.png")
+    file_name = f"{uuid.uuid4()}-sozvezd"
+    plt.savefig(f"detect/static/detect/{folder}/{file_name}.png")
     plt.close()
-    vih.append(a)
+    vih.append(file_name)
     return vih

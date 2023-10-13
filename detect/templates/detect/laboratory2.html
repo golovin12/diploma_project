@@ -1,0 +1,99 @@
+{% extends "detect/base_laborathory.html" %}
+
+{% block content %}
+    <div class="card-content" id="lab2-example" style="display:block">
+        <p class="text-center font-weight-bold h3">Практическое задание 2 (пример выполнения)</p>
+        <p class="text-center font-weight-bold h4">"Детектирование сигналов, используя сигнальное созвездие"</p>
+        <div class="card-content-body">
+            <div class="card-content-info">
+                <p class="text-indent">
+                    В данной работе Вам надо будет выступить в роли детектора и определить, какой сигнал будет на
+                    выходе.
+                </p>
+            </div>
+            <p>Пример выполнения задания: </p>
+            <p>Дан сигнал, который после воздействия шума и прохождения через принимающий фильтр выглядит как
+                показано на рисунке 1.</p>
+            <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.0 }}.png" alt="{{ vih_put.0 }}"/>
+            <p class="image-caption">Рисунок 1 - Внешний вид сигнала</p>
+            <p>Данный сигнал на сигнальном созвездии выглядит, как показано на рисунке 2</p>
+            <input type="hidden" name="prov3" value="{{ d.3 }}"/>
+            <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.0.0 }}.png"
+                 alt="{{ put_sozv.0.0 }}"/>
+            <p class="image-caption">Рисунок 2 - Сигнальное созвездие</p>
+            <div class="card-content-info">
+                <p>Процесс детектирования:</p>
+                <p>1) Определяем цвет первого символа сигнала. На рисунке с сигналом видно, что первый символ
+                    выделен синим цветом.</p>
+                <p>2) Ищем на сигнальном созвездии синюю точку.</p>
+                <p>3) Определяем, в какой области решений находится синяя точка. Как видно, синяя точка находится
+                    ближе к [0], значит первым символом сообщения является "0".</p>
+                <p>4) Смотрим цвет второго символа</p>
+                <p>5) Определяем, что вторым символом является "1"</p>
+                <p>6) Определяем, какому значению соответствуют остальные символы сигнала.</p>
+                <p>После детектирования всех символов получилось сообщение: </p>
+                <input type="hidden" name="prov1" value="{{ d.1 }}"/>
+                <p style="background-color: white;">{{ d.0 }}</p>
+            </div>
+            <div class="text-center">
+                <a href="#" class="orange-button" onclick="collapse('lab2-example'); collapse('lab2')">
+                    Перейти к практике
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-content" id="lab2" style="display:none">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="prov2" value="{{ d.2 }}"/>
+            <p class="text-center font-weight-bold h3">Практическое задание 2</p>
+            <p class="text-center font-weight-bold h4">"Детектирование сигналов, используя сигнальное созвездие"</p>
+            <div class="card-content-body">
+                <div class="card-content-info">
+                    <p>В данной работе Вам надо будет выступить в роли детектора и определить, какой сигнал будет на
+                        выходе.</p>
+                    <p>Демодулируйте каждый из 3 сигналов. Полученный демодулированный сигнал необходимо записывать в
+                        поле для ввода. Учтите, что записывать ответ необходимо без пробелов и других посторонних
+                        символов!</p>
+                </div>
+                <div>
+                    <p>1) Сигнал 1 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
+                    <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.1 }}.png" alt="{{ vih_put.1 }}"/>
+                    <p class="image-caption">Рисунок 1 - Внешний вид сигнала 1</p>
+                    <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.1.0 }}.png"
+                         alt="{{ put_sozv.1.0 }}"/>
+                    <p class="image-caption">Рисунок 2 - Сигнальное созвездие для сигнала 1</p>
+                    <p>Введите значения сигнала 1: <input autocomplete="off" required name="otv1" type="text" size="40"
+                                                          placeholder="Пример ввода: 01101000110101"/></p>
+                    <p>2) Сигнал 2 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
+                    <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.2 }}.png" alt="{{ vih_put.2 }}"/>
+                    <p class="image-caption">Рисунок 3 - Внешний вид сигнала 2</p>
+                    <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.2.0 }}.png"
+                         alt="{{ put_sozv.2.0 }}"/>
+                    <p class="image-caption">Рисунок 4 - Сигнальное созвездие для сигнала 2</p>
+                    <p>Введите значения сигнала 2: <input autocomplete="off" required name="otv2" type="text" size="40"
+                                                          placeholder="Пример ввода: 01101000110101"/></p>
+                    <p>3) Сигнал 3 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
+                    <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.3 }}.png" alt="{{ vih_put.3 }}"/>
+                    <p class="image-caption">Рисунок 5 - Внешний вид сигнала 3</p>
+                    <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.3.0 }}.png"
+                         alt="{{ put_sozv.3.0 }}"/>
+                    <p class="image-caption">Рисунок 6 - Сигнальное созвездие для сигнала 3</p>
+                    <p>Введите значения сигнала 3: <input autocomplete="off" required name="otv3" type="text" size="40"
+                                                          placeholder="Пример ввода: 01101000110101"/></p>
+                    <p>После того, как Вы детектируете все 3 сигнала, нажмите кнопку "Проверить".</p>
+                    <div class="text-center">
+                        <button type="submit" class="orange-button" style="width: 50%">Проверить</button>
+                    </div>
+                    <p>Вы можете посмотреть пример выполнения задания, нажав на кнопку ниже (все введенные значения
+                        сохранятся).</p>
+                    <div class="text-center">
+                        <a href="#" class="button2" onclick="collapse('lab2-example'); collapse('lab2')">
+                            Показать пример
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

@@ -1,0 +1,114 @@
+{% extends "detect/base_laborathory.html" %}
+
+{% block content %}
+    <div class="card-content" id="lab3-example" style="display:block">
+        <p class="text-center font-weight-bold h3">Практическое задание 3 (пример выполнения)</p>
+        <p class="text-center font-weight-bold h4">"Реализация QPSK детектора в MATLAB или Python"</p>
+        <div class="card-content-body">
+            <div class="card-content-info">
+                <p class="text-indent">
+                    В данной работе Вам надо будет изучить принцип работы QPSK детектора и смоделировать его в Python
+                    или MATLAB.
+                </p>
+            </div>
+            <p>На рисунке 1 показан вид сигнального созвездия для набора сигналов в модуляции MPSK (multiple
+                phase-shift keying — многофазная манипуляция); на рисунке представлена четырехуровневая (М = 4)
+                фазовая манипуляция, или двукратная фазовая манипуляция (quadriphase shift keying — QPSK).
+                Двоичные цифры в передатчике группируются по две, и в каждом интервале передачи символов две
+                последовательные цифры определяют, какой из четырех возможных сигналов произведет модулятор.</p>
+            <img class="bordered-image" src="/static/detect/lab3/QPSK_sozv.png" alt="QPSK_sozv"/>
+            <p class="image-caption">Рисунок 1 - Сигнальное созвездие для QPSK модуляции</p>
+            <p>Правило принятия решения для детектора звучит следующим образом: если вектор принятого сигнала
+                попадает в область 1 — отнести его к [0 1]; если вектор принятого сигнала попадает в область 2 —
+                выбрать сигнал [1 0] и т.д.</p>
+            <p>В данной работе Вам надо будет изучить принцип работы QPSK детектора и смоделировать его в Python
+                или MATLAB.</p>
+            <p>На сигнальном созвездии отмечаются точки, где по горизонтальной оси отмечены реальные
+                составляющие сигнала, а по вертикальной - мнимые.</p>
+            <p>Допустим был принят сигнал, представленный на рисунке 2.</p>
+            <img class="bordered-image" src="/static/detect/lab3/QPSK_awgn.png" alt="QPSK_awgn"/>
+            <p class="image-caption">Рисунок 2 - Внешний вид принятого сигнала</p>
+            <p>Этот сигнал раскладывается на набор комплексных чисел:</p>
+            <p>0.14655691-0.98692877j</p>
+            <p>0.11948779-1.031542j</p>
+            <p>-0.97404107-0.05535661j</p>
+            <p>-0.89145423-0.04386276j</p>
+            <p>0.01162621-1.09461492j</p>
+            <p>-0.82798739-0.09869813j</p>
+            <p>-1.15508335+0.17860423j</p>
+            <p>-0.97800367+0.08736139j</p>
+            <p>Сигнальное созвездие после того как отметили точки, представлено на рисунке 3.</p>
+            <img class="bordered-image" src="/static/detect/lab3/QPSK_vibor.png" alt="QPSK_vibor"/>
+            <p class="image-caption">Рисунок 3 - Сигнальное созвездие для принятого сигнала</p>
+            <p>После детектирования получим сигнал: 0000111100111111</p>
+            <div class="card-content-info">
+                <p>Вам необходимо написать на языке Python или MATLAB QPSK-детектор.</p>
+                <p>1) Входные данные (копируются в вашу программу): список из комплексных чисел.</p>
+                <p>2) Необходимо перебрать каждое комплексное число и детектировать.</p>
+                <p>4) Должно получиться сообщение из "0" и "1".</p>
+                <p>5) Выходные данные (их необходимо ввести в поля для ввода): последовательность из "0" и
+                    "1".</p>
+                <p>6) Для проверки детектора нажмите кнопку "Проверить", вам будет представлено 3 списка
+                    комплексных чисел, нужно будет получить 3 сигнала после детектирования и ввести полученный
+                    результат в поля для ввода.</p>
+            </div>
+            <div class="text-center">
+                <a href="#" class="orange-button" onclick="collapse('lab3-example'); collapse('lab3')">
+                    Проверить
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-content" id="lab3" style="display:none">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="mess3" value="{{ mess.2 }}"/>
+            <input type="hidden" name="mess2" value="{{ mess.1 }}"/>
+            <input type="hidden" name="mess1" value="{{ mess.0 }}"/>
+            <p class="text-center font-weight-bold h3">Практическое задание 3</p>
+            <p class="text-center font-weight-bold h4">"Реализация QPSK детектора в MATLAB или Python"</p>
+            <div class="card-content-body">
+                <div class="card-content-info">
+                    <p class="text-indent">
+                        Для проверки работы детектора скопируйте входные данные в код с вашим детектором, а потом
+                        вставьте выходные данные в поле для ввода.
+                    </p>
+                </div>
+                <a class="link-red" href="##" onclick="collapse('sig1')">
+                    1) Входные данные для сигнала 1 (нажмите, чтобы посмотреть):
+                </a>
+                <div id="sig1" style="display:none">
+                    <p>{{ spisok.0 }}</p>
+                </div>
+                <p>Введите выходные данные для сигнала 1:
+                    <input autocomplete="off" required name="otv1" type="text" size="40"
+                           placeholder="Пример ввода: 01101000110101"/>
+                </p>
+                <a class="link-red" href="##" onclick="collapse('sig2')">
+                    2) Входные данные для сигнала 2 (нажмите, чтобы посмотреть):
+                </a>
+                <div id="sig2" style="display:none">
+                    <p>{{ spisok.1 }}</p>
+                </div>
+                <p>Введите выходные данные для сигнала 2:
+                    <input autocomplete="off" required name="otv2" type="text" size="40"
+                           placeholder="Пример ввода: 01101000110101"/>
+                </p>
+                <a class="link-red" href="##" onclick="collapse('sig3')">
+                    3) Входные данные для сигнала 3 (нажмите, чтобы посмотреть):
+                </a>
+                <div id="sig3" style="display:none">
+                    <p>{{ spisok.2 }}</p>
+                </div>
+                <p>Введите выходные данные для сигнала 3:
+                    <input autocomplete="off" required name="otv3" type="text" size="40"
+                           placeholder="Пример ввода: 01101000110101"/>
+                </p>
+                <p>После того, как Вы детектируете все 3 сигнала, нажмите кнопку "Проверить".</p>
+                <div class="text-center">
+                    <button type="submit" class="orange-button" style="width: 50%">Проверить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
