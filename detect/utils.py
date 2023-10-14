@@ -1,13 +1,15 @@
 import io
 import math, cmath
 import random
+import uuid
 
 import numpy as np
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
+from scipy.fft import fft, ifft
 
-from detect.models import Student, StudentLab2, StudentLab3
-from modulation_script import Modem, PSKModem, QAMModem
+from detect.models import Student, StudentLab2, StudentLab3, StudentLab4
+from modulation_script import Modem, PSKModem, QAMModem, OFDMModem
 
 
 def convert_base(num, to_base=2, from_base=2):
@@ -176,3 +178,19 @@ def get_lab3_tasks_by_student(student: Student) -> list[StudentLab3]:
             lab3.save()
         lab3_tasks.append(lab3)
     return lab3_tasks
+
+
+def get_lab4_by_student(student: Student) -> StudentLab4:
+    lab4_task, create = StudentLab4.objects.get_or_create(student=student)
+    if not lab4_task.signal:
+        # Формирование сигнала и OFDM-модуляция
+        message = [random.choice((0, 1)) for i in range(96)]
+        modem = OFDMModem()
+        modulated_signal = modem.modulate(message)
+        signal_with_gaussian = awgn(modulated_signal, 30)
+        demodulated_message = modem.demodulate(signal_with_gaussian)
+        lab4_task.signal = "".join(str(i) for i in demodulated_message)
+        lab4_task.signal_complex = [i for i in signal_with_gaussian]
+        lab4_task.signal_image.save(f'ofdm_{lab4_task.id}.png', modem.get_signal_image(signal_with_gaussian))
+        lab4_task.save()
+    return lab4_task

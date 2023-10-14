@@ -20,10 +20,12 @@ Modulation Demodulation (:mod:`commpy.modulation`)
    max_log_approx       -- Max-Log Approximation.
 
 """
+import io
 from bisect import insort
 from itertools import product
 
 import matplotlib.pyplot as plt
+import numpy as np
 from numpy import arange, array, zeros, pi, cos, sin, sqrt, log2, argmin, \
     hstack, repeat, tile, dot, shape, concatenate, exp, \
     log, vectorize, empty, eye, kron, inf, full, abs, newaxis, minimum, clip
@@ -37,7 +39,6 @@ __all__ = ['PSKModem', 'QAMModem', 'ofdm_tx', 'ofdm_rx', 'mimo_ml', 'kbest', 'be
 
 
 class Modem:
-
     """ Creates a custom Modem object.
 
         Parameters
@@ -140,11 +141,11 @@ class Modem:
         if c < 32:
             for symb in self.constellation:
                 plt.text(symb.real + .05, symb.imag, self.demodulate(symb, 'hard'))
-        #else:
-            #for i in range(len(self.constellation)):
-                #if i%4 == 0:
-                    #symb = self.constellation[i]
-                    #plt.text(symb.real + .05, symb.imag, self.demodulate(symb, 'hard'))
+        # else:
+        #    for i in range(len(self.constellation)):
+        #        if i%4 == 0:
+        #            symb = self.constellation[i]
+        #            plt.text(symb.real + .05, symb.imag, self.demodulate(symb, 'hard'))
         return plt.grid()
 
     @property
@@ -633,3 +634,63 @@ def max_log_approx(y, h, noise_var, pts_list, demode):
         LLR[k] = min(norms0) - min(norms1)
 
     return -LLR / (2 * noise_var)
+
+
+class OFDMModem:
+    def __init__(self):
+        self.qpsk_modem = PSKModem(4)
+
+    def modulate(self, input_bits: list) -> list:
+        # todo code optimization
+        qpsk1_msg = []
+        qpsk2_msg = []
+        qpsk3_msg = []
+        qpsk4_msg = []
+        for i in range(0, len(input_bits), 4):
+            qpsk1_msg.append(input_bits[i])
+            qpsk2_msg.append(input_bits[i + 1])
+            qpsk3_msg.append(input_bits[i + 2])
+            qpsk4_msg.append(input_bits[i + 3])
+        qpsk1_modulated_msg = ifft(self.qpsk_modem.modulate(qpsk1_msg))
+        qpsk2_modulated_msg = ifft(self.qpsk_modem.modulate(qpsk2_msg))
+        qpsk3_modulated_msg = ifft(self.qpsk_modem.modulate(qpsk3_msg))
+        qpsk4_modulated_msg = ifft(self.qpsk_modem.modulate(qpsk4_msg))
+        modulated_signal = []
+        for i in range(len(qpsk1_modulated_msg)):
+            modulated_signal.append(qpsk1_modulated_msg[i])
+            modulated_signal.append(qpsk2_modulated_msg[i])
+            modulated_signal.append(qpsk3_modulated_msg[i])
+            modulated_signal.append(qpsk4_modulated_msg[i])
+        return modulated_signal
+
+    def demodulate(self, signal: np.ndarray[np.complex_]) -> list:
+        # todo code optimization
+        qpsk1_input_msg = []
+        qpsk2_input_msg = []
+        qpsk3_input_msg = []
+        qpsk4_input_msg = []
+        for i in range(0, len(signal), 4):
+            qpsk1_input_msg.append(signal[i])
+            qpsk2_input_msg.append(signal[i + 1])
+            qpsk3_input_msg.append(signal[i + 2])
+            qpsk4_input_msg.append(signal[i + 3])
+        qpsk1_demodulated_msg = self.qpsk_modem.demodulate(fft(qpsk1_input_msg), "hard")
+        qpsk2_demodulated_msg = self.qpsk_modem.demodulate(fft(qpsk2_input_msg), "hard")
+        qpsk3_demodulated_msg = self.qpsk_modem.demodulate(fft(qpsk3_input_msg), "hard")
+        qpsk4_demodulated_msg = self.qpsk_modem.demodulate(fft(qpsk4_input_msg), "hard")
+        demodulated_message = []
+        for i in range(len(qpsk1_demodulated_msg)):
+            demodulated_message.append(qpsk1_demodulated_msg[i])
+            demodulated_message.append(qpsk2_demodulated_msg[i])
+            demodulated_message.append(qpsk3_demodulated_msg[i])
+            demodulated_message.append(qpsk4_demodulated_msg[i])
+        return demodulated_message
+
+    @staticmethod
+    def get_signal_image(signal: np.ndarray[np.complex_]) -> io.BytesIO:
+        buf = io.BytesIO()
+        plt.plot(signal)
+        plt.grid()
+        plt.savefig(buf, format='png')
+        plt.close()
+        return buf

@@ -3,7 +3,7 @@
 {% block content %}
     {% if request.user.lab3_is_complete %}
         <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
-            Вы успешно детектировали все 3 сигнала. Зафиксируйте результат и можете перейти к следующей практике!
+            Вы успешно детектировали все сигналы. Зафиксируйте результат и можете перейти к следующей практике!
         </div>
     {% elif request.method == "POST" and not request.user.lab3_is_complete %}
         <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
@@ -27,7 +27,7 @@
                 Двоичные цифры в передатчике группируются по две, и в каждом интервале передачи символов две
                 последовательные цифры определяют, какой из четырех возможных сигналов произведет модулятор.</p>
             <img class="bordered-image" src="/static/detect/lab3_QPSK_sozv.png"
-                 alt="/static/detect/lab3/QPSK_sozv.png"/>
+                 alt="/static/detect/lab3_QPSK_sozv.png"/>
             <p class="image-caption">Рисунок 1 - Сигнальное созвездие для QPSK модуляции</p>
             <p>Правило принятия решения для детектора звучит следующим образом: если вектор принятого сигнала
                 попадает в область 1 — отнести его к [0 1]; если вектор принятого сигнала попадает в область 2 —
@@ -38,7 +38,7 @@
                 составляющие сигнала, а по вертикальной - мнимые.</p>
             <p>Допустим был принят сигнал, представленный на рисунке 2.</p>
             <img class="bordered-image" src="/static/detect/lab3_QPSK_awgn.png"
-                 alt="/static/detect/lab3/QPSK_awgn.png"/>
+                 alt="/static/detect/lab3_QPSK_awgn.png"/>
             <p class="image-caption">Рисунок 2 - Внешний вид принятого сигнала</p>
             <p>Этот сигнал раскладывается на набор комплексных чисел:</p>
             <p>0.14655691-0.98692877j</p>
@@ -51,7 +51,7 @@
             <p>-0.97800367+0.08736139j</p>
             <p>Сигнальное созвездие после того как отметили точки, представлено на рисунке 3.</p>
             <img class="bordered-image" src="/static/detect/lab3_QPSK_vibor.png"
-                 alt="/static/detect/lab3/QPSK_vibor.png"/>
+                 alt="/static/detect/lab3_QPSK_vibor.png"/>
             <p class="image-caption">Рисунок 3 - Сигнальное созвездие для принятого сигнала</p>
             <p>После детектирования получим сигнал: 0000111100111111</p>
             <div class="card-content-info">
@@ -61,9 +61,9 @@
                 <p>4) Должно получиться сообщение из "0" и "1".</p>
                 <p>5) Выходные данные (их необходимо ввести в поля для ввода): последовательность из "0" и
                     "1".</p>
-                <p>6) Для проверки детектора нажмите кнопку "Проверить", вам будет представлено 3 списка
-                    комплексных чисел, нужно будет получить 3 сигнала после детектирования и ввести полученный
-                    результат в поля для ввода.</p>
+                <p>6) Для проверки детектора нажмите кнопку "Проверить", вам будет представлено несколько списков
+                    сигналов (в виде комплексных чисел), нужно их детектировать и ввести полученные результаты в
+                    поля для ввода.</p>
             </div>
             <div class="text-center">
                 <a href="#" class="orange-button" onclick="collapse('lab3-example'); collapse('lab3')">
@@ -86,12 +86,13 @@
                 </div>
                 {% for lab3 in lab3_tasks %}
                     <a class="link-red" href="##" onclick="collapse('signal-{{ lab3.multiplier }}')">
-                        1) Входные данные для сигнала 1 (нажмите, чтобы посмотреть):
+                        {{ forloop.counter }}) Входные данные для сигнала {{ forloop.counter }}
+                        (нажмите, чтобы посмотреть):
                     </a>
                     <div id="signal-{{ lab3.multiplier }}" style="display:none">
-                        <p>{{ lab3.signal_complex }}</p> {# todo copy button #}
+                        <p>{{ lab3.signal_complex }}</p> {# todo button for text copy #}
                     </div>
-                    <p>Введите выходные данные для сигнала 1:
+                    <p>Введите выходные данные для сигнала {{ forloop.counter }}:
                         <input autocomplete="off" name="signal-{{ lab3.multiplier }}" type="text" size="40"
                                placeholder="Пример ввода: 01101000110101"
                                 {% if lab3.is_complete %}
@@ -101,7 +102,7 @@
                                 {% endif %}/>
                     </p>
                 {% endfor %}
-                <p>После того, как Вы детектируете все 3 сигнала, нажмите кнопку "Проверить".</p>
+                <p>После того, как Вы детектирования всех сигналов, нажмите кнопку "Проверить".</p>
                 <div class="text-center">
                     <button type="submit" class="orange-button" style="width: 50%">Проверить</button>
                 </div>

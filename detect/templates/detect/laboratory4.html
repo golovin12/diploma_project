@@ -1,7 +1,17 @@
 {% extends "detect/base_laborathory.html" %}
 
 {% block content %}
-    <div class="card-content" id="lab4-example" style="display:block">
+    {% if request.user.lab4_is_complete %}
+        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
+            Вы успешно детектировали сигнал. Зафиксируйте результат и можете перейти к тестированию!
+        </div>
+    {% elif request.method == "POST" and not request.user.lab4_is_complete %}
+        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
+            У вас не удалось детектировать сигнал, попробуйте ещё раз!
+        </div>
+    {% endif %}
+    <div class="card-content" id="lab4-example"
+         style="display:{% if request.method == "POST" %}none{% else %}block{% endif %}">
         <p class="text-center font-weight-bold h3">Практическое задание 4(пример выполнения)</p>
         <p class="text-center font-weight-bold h4">"Реализация OFDM демодулятора в MATLAB или Python"</p>
         <div class="card-content-body">
@@ -12,7 +22,8 @@
                 </p>
             </div>
             <p>Упрощенная схема передачи с OFDM-модулятором представлена на рисунке 1.</p>
-            <img class="bordered-image" src="/static/detect/lab4/OFDMmodulation.png" alt="OFDMmodulation"/>
+            <img class="bordered-image" src="/static/detect/lab4_OFDMmodulation.png"
+                 alt="/static/detect/lab4_OFDMmodulation.png"/>
             <p class="image-caption">Рисунок 1 - Упрощённая схема передатчика с OFDM-модулятором</p>
             <p>Как видно из рисунка 1, входное сообщение сначала преобразуется из последовательного кода в
                 параллельный. Затем параллельный код проходит процессы модуляции и обратного преобразования
@@ -23,8 +34,8 @@
                 кода</p>
             <p>Необходимо смоделировать на языке Python или MATLAB OFDM-демодулятор, который будет детектировать
                 сигналы, отправленные с передатчика, изображенного на рисунке 2.</p>
-            <img class="bordered-image" src="/static/detect/lab4/OFDM(4QPSK)modulation.png"
-                 alt="OFDM(4QPSK)modulation"/>
+            <img class="bordered-image" src="/static/detect/lab4_OFDM(4QPSK)modulation.png"
+                 alt="/static/detect/lab4_OFDM(4QPSK)modulation.png"/>
             <p class="image-caption">Рисунок 2 - Передатчик с OFDM-модулятором, в состав которого входит четыре
                 QPSK-модулятора</p>
             <p>Допустим, на приёмник поступил сигнал, представленный на рисунке 3. Данный сигнал на выходе АЦП
@@ -41,7 +52,8 @@
             <p>0.1206058 -0.43642j</p>
             <p>0.25521732 -0.9055472j</p>
             <p>-0.35205805 +0.60033668j</p>
-            <img class="bordered-image" src="/static/detect/lab4/OFDM(4QPSK)signal.png" alt="OFDM(4QPSK)signal"/>
+            <img class="bordered-image" src="/static/detect/lab4_OFDM(4QPSK)signal.png"
+                 alt="/static/detect/lab4_OFDM(4QPSK)signal.png"/>
             <p class="image-caption">Рисунок 3 - Сигнал, поступивший на приёмник</p>
             <p>Стоит отметить, что сигнал выглядит в форме ломаной потому, что он имеет малую длительность.
                 Сигнал с большей длительностью представлен на странице, которая откроется после нажатия на
@@ -67,10 +79,9 @@
             </div>
         </div>
     </div>
-    <div class="card-content" id="lab4" style="display:none">
+    <div class="card-content" id="lab4" style="display:{% if request.method == "POST" %}block{% else %}none{% endif %}">
         <form method="POST">
             {% csrf_token %}
-            <input type="hidden" name="vihod" value="{{ vihod }}"/>
             <p class="text-center font-weight-bold h3">Практическое задание 4</p>
             <p class="text-center font-weight-bold h4">"Реализация OFDM-демодулятора в MATLAB или Python"</p>
             <div class="card-content-body">
@@ -81,17 +92,22 @@
                     </p>
                 </div>
                 <p>Сигнал, поступивший на приёмник представлен на рисунке 1.</p>
-                <img class="bordered-image" src="/static/detect/lab4/{{ put }}.png" alt="{{ put }}"/>
+                <img class="bordered-image" src="{{ lab4.signal_image.url }}" alt="{{ lab4.signal_image.url }}"/>
                 <p class="image-caption">Рисунок 1 - Сигнал, поступивший на приёмник</p>
                 <a class="link-red" href="##" onclick="collapse('signal')">
-                    Входные данные (нажмите, чтобы посмотреть):
+                    Входные данные (нажмите, чтобы посмотреть): {# todo button for text copy #}
                 </a>
                 <div id="signal" style="display:none">
-                    <p>{{ signal }}</p>
+                    <p>{{ lab4.signal_complex }}</p>
                 </div>
                 <p>Введите получившееся сообщение:
-                    <input autocomplete="off" required name="otv" type="text" size="40"
-                           placeholder="Пример ввода: 01101000110101"/>
+                    <input autocomplete="off" name="signal" type="text" size="40"
+                           placeholder="Пример ввода: 01101000110101"
+                            {% if lab4.is_complete %}
+                           class="form-control is-valid" value="{{ lab4.signal }}" disabled
+                            {% else %}
+                           class="form-control" required
+                            {% endif %}/>
                 </p>
                 <p>После того, как Вы детектируете сигнал, нажмите кнопку "Проверить".</p>
                 <div class="text-center">
@@ -100,4 +116,4 @@
             </div>
         </form>
     </div>
-{% endblock content %}
+{% endblock %}

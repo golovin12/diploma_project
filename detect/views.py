@@ -1,10 +1,5 @@
 import random
-import uuid
 import warnings
-
-import matplotlib.pyplot as plt
-from commpy.channels import awgn
-from scipy.fft import fft, ifft
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -16,11 +11,10 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 
-from modulation_script import PSKModem, QAMModem
 from .forms import StudentForm, DemodulateInfluenceSNRFrom
-from .models import Student, StudentLab1, StudentLab2, StudentLab3
-from .utils import convert_base, for_test, get_random_message, get_signal_image, get_signal_stars, \
-    get_modem_by_modulation, get_lab2_tasks_by_student, get_lab3_tasks_by_student
+from .models import Student, StudentLab1
+from .utils import convert_base, for_test, get_lab2_tasks_by_student, get_lab3_tasks_by_student, \
+    get_lab4_by_student
 
 warnings.filterwarnings('ignore')
 
@@ -206,81 +200,12 @@ def laboratory3(request: WSGIRequest):
 @require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory4(request: WSGIRequest):
-    # Для каждого студента генерируем свой сигнал и работаем только с ним.
-    # Пример выносим из бэка
+    lab4 = get_lab4_by_student(request.user)
     if request.method == "POST":
-        vihod = request.POST.get("vihod")
-        vihod = convert_base(vihod, 2, 20)[::-1][3:][:-3]
-        otv = request.POST.get("otv")
-        if otv == vihod:
-            result = "Вы успешно выполнили задание 4. Покажите результат преподавателю."
-        else:
-            result = "Вы не справились с 4 заданием, попробуйте ещё раз."
-        return render(request, 'detect/result.html', context={"result": result})
-    else:
-        # Формирование сигнала и OFDM-модуляция
-        msg = []
-        for i in range(96):
-            msg.append(random.choice([0, 1]))
-        modem1 = PSKModem(4)
-        msg1 = []
-        msg2 = []
-        msg3 = []
-        msg4 = []
-        for i in range(0, len(msg), 4):
-            msg1.append(msg[i])
-            msg2.append(msg[i + 1])
-            msg3.append(msg[i + 2])
-            msg4.append(msg[i + 3])
-        mod1 = modem1.modulate(msg1)
-        ofmod1 = ifft(mod1)
-        mod2 = modem1.modulate(msg2)
-        ofmod2 = ifft(mod2)
-        mod3 = modem1.modulate(msg3)
-        ofmod3 = ifft(mod3)
-        mod4 = modem1.modulate(msg4)
-        ofmod4 = ifft(mod4)
-        ofperedach = []
-        for i in range(len(ofmod1)):
-            ofperedach.append(ofmod1[i])
-            ofperedach.append(ofmod2[i])
-            ofperedach.append(ofmod3[i])
-            ofperedach.append(ofmod4[i])
-        of_for_priem = awgn(ofperedach, 30)
-        signal = []
-        for i in of_for_priem:
-            signal.append(i)
-        file_name = uuid.uuid4()
-        plt.plot(of_for_priem)
-        plt.grid()
-        plt.savefig(f"detect/static/detect/lab4/{file_name}.png")
-        plt.close()
-        # OFDM-демодуляция
-        for_demod1 = []
-        for_demod2 = []
-        for_demod3 = []
-        for_demod4 = []
-        for i in range(0, len(of_for_priem), 4):
-            for_demod1.append(of_for_priem[i])
-            for_demod2.append(of_for_priem[i + 1])
-            for_demod3.append(of_for_priem[i + 2])
-            for_demod4.append(of_for_priem[i + 3])
-        demod1 = modem1.demodulate(fft(for_demod1), "hard")
-        demod2 = modem1.demodulate(fft(for_demod2), "hard")
-        demod3 = modem1.demodulate(fft(for_demod3), "hard")
-        demod4 = modem1.demodulate(fft(for_demod4), "hard")
-        sig_vih = []
-        for i in range(len(demod1)):
-            sig_vih.append(demod1[i])
-            sig_vih.append(demod2[i])
-            sig_vih.append(demod3[i])
-            sig_vih.append(demod4[i])
-        vihod = ""
-        for i in sig_vih:
-            vihod += str(i)
-        vihod = "101" + vihod[::-1] + "011"
-        vihod = convert_base(vihod, 20, 2)
-        return render(request, 'detect/laboratory4.html', context={"put": file_name, "signal": signal, "vihod": vihod})
+        if not lab4.is_complete and request.POST.get('signal') == lab4.signal:
+            lab4.is_complete = True
+            lab4.save()
+    return render(request, 'detect/laboratory4.html', context={"lab4": lab4})
 
 
 # Запоминает вопросы пользователя
