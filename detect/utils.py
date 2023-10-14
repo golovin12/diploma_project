@@ -1,13 +1,12 @@
 import io
 import math, cmath
 import random
-import uuid
 
 import numpy as np
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
 
-from modulation_script import QAMModem, PSKModem, Modem
+from modulation_script import Modem
 
 
 def convert_base(num, to_base=2, from_base=2):
@@ -69,13 +68,14 @@ def for_test(file_name, kolich):
     return zagolovok, voprosi, otveti
 
 
-def get_modulation_graph(modem: Modem, modulation_position: int, modulation: str) -> io.BytesIO:
-    """Построение графика для выбранного типа модуляции"""
+def get_signal_stars(modem: Modem, modulation_position: int, modulation: str,
+                     signal: np.ndarray[np.complex_] = None) -> io.BytesIO:
+    """Построение сигнального созвездия"""
     fig, ax = plt.subplots()
     modem.plot_constellation(modulation_position)
     if modulation_position == 2:
-        plt.scatter(-1, 1, c='white', s=1)
-        plt.scatter(1, -1, c='white', s=1)
+        plt.scatter(-0.5, 0.5, c='white', s=1)
+        plt.scatter(0.5, -0.5, c='white', s=1)
     ax.set_xlabel('I (Синфазная ось)', labelpad=120)
     ax.set_ylabel('Q (Квадратурная ось)', labelpad=160)
     ax.spines['left'].set_position(('data', 0.0))
@@ -84,7 +84,12 @@ def get_modulation_graph(modem: Modem, modulation_position: int, modulation: str
     ax.spines['top'].set_color('none')
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    plt.title(modulation + " модуляция")
+    plt.title(f"{modulation} модуляция")
+    if signal is not None:
+        ax.axes.get_xaxis().set_ticklabels([])
+        ax.axes.get_yaxis().set_ticklabels([])
+        for complex_number in signal:
+            plt.scatter(complex_number.real, complex_number.imag)
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     plt.close()
@@ -93,13 +98,7 @@ def get_modulation_graph(modem: Modem, modulation_position: int, modulation: str
 
 def get_random_message(modulation_position: int):
     k = int(math.log2(modulation_position))
-    if k <= 3:
-        multiplier = 6 + 2 * k
-    elif k <= 7:
-        multiplier = 4 * k
-    else:
-        multiplier = 32
-    return [random.choice((0, 1)) for i in range(multiplier)]
+    return [random.choice((0, 1)) for i in range(k * 8)]
 
 
 def get_signals(modem: Modem, modulation_position: int,
@@ -115,7 +114,7 @@ def get_signals(modem: Modem, modulation_position: int,
 
 
 def get_signal_image(signal: np.ndarray[np.complex_]) -> io.BytesIO:
-    """Построение графиков сигналов; вывод пути до построенных графиков"""
+    """Построение графиков сигналов"""
     fig, ax = plt.subplots()
     mr = 0
     for next_index, complex_number in enumerate(signal, start=1):
@@ -136,64 +135,3 @@ def get_signal_image(signal: np.ndarray[np.complex_]) -> io.BytesIO:
     plt.savefig(buf, format='png')
     plt.close()
     return buf
-
-
-def for_lab2(a, folder):
-    vih = []
-    for signal in a:
-        fig, ax = plt.subplots()
-        mr = 0
-        for i in range(len(signal)):
-            element = signal[i]
-            g = np.linspace(mr, mr + 8 * math.pi, 200)
-            mr += 8 * math.pi
-            cel = math.sqrt(2) * math.sqrt((element.real) ** 2 + (element.imag) ** 2)
-            fas = cmath.phase(element)
-            u = cel * np.sin(g + fas)
-            if i + 1 < len(signal):
-                plt.plot([mr, mr], [cel * np.sin(fas), math.sqrt(2) * math.sqrt(
-                    (signal[i + 1].real) ** 2 + (signal[i + 1].imag) ** 2) * np.sin(
-                    cmath.phase(signal[i + 1]))], color='k')
-            plt.plot(g, u)
-        file_name = uuid.uuid4()
-        plt.grid()
-        ax.set_xlabel('Время, с')
-        ax.set_ylabel('Амплитуда, В')
-        plt.savefig(f"detect/static/detect/{folder}/{file_name}.png")
-        plt.close()
-        vih.append(file_name)
-    return vih
-
-
-def sozvezd(soobh, t_modulat, modulat, folder):
-    vih = []
-    fig, ax = plt.subplots()
-    g = int(t_modulat)
-    if modulat == "PSK":
-        modem = PSKModem(g)
-        m = "PSK модуляция"
-    else:
-        modem = QAMModem(g)
-        m = "QAM модуляция"
-    modem.plot_constellation(int(t_modulat))
-    if int(t_modulat) == 2:
-        plt.scatter(-0.5, 0.5, c='white', s=1)
-        plt.scatter(0.5, -0.5, c='white', s=1)
-    ax.set_xlabel('I (Синфазная ось)', labelpad=120)
-    ax.set_ylabel('Q (Квадратурная ось)', labelpad=160)
-    ax.spines['left'].set_position(('data', 0.0))
-    ax.spines['bottom'].set_position(('data', 0.0))
-    ax.spines['right'].set_color('none')
-    ax.spines['top'].set_color('none')
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
-    ax.axes.get_xaxis().set_ticklabels([])
-    ax.axes.get_yaxis().set_ticklabels([])
-    plt.title(str(t_modulat) + "-" + m)
-    for j in soobh:
-        plt.scatter(j.real, j.imag)
-    file_name = f"{uuid.uuid4()}-sozvezd"
-    plt.savefig(f"detect/static/detect/{folder}/{file_name}.png")
-    plt.close()
-    vih.append(file_name)
-    return vih

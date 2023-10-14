@@ -16,10 +16,10 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 
-from modulation_script import QAMModem, PSKModem
+from modulation_script import PSKModem
 from .forms import StudentForm, DemodulateInfluenceSNRFrom
-from .models import Student, StudentLab1
-from .utils import convert_base, for_test, for_lab2, sozvezd
+from .models import Student, StudentLab1, StudentLab2
+from .utils import convert_base, for_test
 
 warnings.filterwarnings('ignore')
 
@@ -179,70 +179,18 @@ def laboratory1(request: WSGIRequest):
 @login_required(login_url="/detect/student_login/")
 @never_cache
 def laboratory2(request: WSGIRequest):
-    # Для каждого студента генерируем свой набор сигналов и изображений и работаем только с ним.
-    # Пример выносим из бэка
+    lab2_tasks = []
+    for modulation in ('4-PSK', '4-QAM', '16-QAM'):  # todo заменить на константы
+        lab2, create = StudentLab2.objects.get_or_create(student=request.user, modulation=modulation)
+        if not lab2.signal:
+            lab2.create_task()
+        lab2_tasks.append(lab2)
     if request.method == "POST":
-        prov1 = convert_base(request.POST.get("prov1"), 2, 17)
-        prov1 = prov1[::-1][3:][:-3]
-        prov2 = convert_base(request.POST.get("prov2"), 2, 28)
-        prov2 = prov2[::-1][3:][:-3]
-        prov3 = convert_base(request.POST.get("prov3"), 2, 23)
-        prov3 = prov3[::-1][3:][:-3]
-        otv1 = request.POST.get("otv1")
-        otv2 = request.POST.get("otv2")
-        otv3 = request.POST.get("otv3")
-        c = 0
-        for i in [prov1, prov2, prov3]:
-            if i in [otv1, otv2, otv3]:
-                c += 1
-        if c == 3:
-            result = "Вы успешно справились с заданием 2. Покажите результат преподавателю!"
-        else:
-            result = f"Вы не справились с заданием, попробуйте ещё раз! Вы правильно детектировали {c} сигналов."
-        return render(request, 'detect/result.html', context={"result": result})
-    else:
-        d = []
-        vih = []
-        put_sozv = []
-        modems = [PSKModem(4), QAMModem(4), QAMModem(16)]
-        prim = PSKModem(2)
-        prim_sig = [0, 1, 1, 0, 1, 0, 0, 0, 1]
-        prim_vih = awgn(prim.modulate(prim_sig), 13)
-        vih.append(prim_vih)
-        d.append(prim.demodulate(prim_vih, "hard"))
-        for i in modems:
-            if i in modems[:-1]:
-                snr = 15
-            else:
-                snr = 21
-            if snr == 15:
-                a = random.choice(range(16, 20, 2))
-            else:
-                a = random.choice(range(32, 40, 4))
-            msg = []
-            for j in range(a):
-                msg.append(random.choice([0, 1]))
-            t = awgn(i.modulate(msg), snr)
-            vih.append(t)
-            d.append(i.demodulate(t, "hard"))
-        t_modulat = [2, 4, 4, 16]
-        modulat = ["PSK", "PSK", "QAM", "QAM"]
-        for i in range(len(vih)):
-            put_sozv.append(sozvezd(vih[i], t_modulat[i], modulat[i], "lab2"))
-        vih_put = for_lab2(vih, "lab2")
-        det = []
-        for i in d:
-            bd = ""
-            for j in i:
-                bd += str(j)
-            det.append(bd)
-        m1 = "101" + det[1][::-1] + "101"
-        det[1] = convert_base(m1, 17, 2)
-        m2 = "110" + det[2][::-1] + "011"
-        det[2] = convert_base(m2, 28, 2)
-        m3 = "100" + det[3][::-1] + "001"
-        det[3] = convert_base(m3, 23, 2)
-        return render(request, 'detect/laboratory2.html', context={"d": det, "vih_put": vih_put, "put_sozv": put_sozv})
+        for lab2 in lab2_tasks:
+            if not lab2.is_complete and request.POST.get(lab2.modulation) == lab2.signal:
+                lab2.is_complete = True
+                lab2.save()
+    return render(request, 'detect/laboratory2.html', context={'lab2_tasks': lab2_tasks})
 
 
 @login_required(login_url="/detect/student_login/")

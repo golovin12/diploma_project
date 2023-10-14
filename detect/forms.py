@@ -3,7 +3,7 @@ from django import forms
 from modulation_script import QAMModem, PSKModem, Modem
 from .consts import modulation_choices
 from .models import Student, Modulation, TemporaryImage
-from .utils import get_signals, get_signal_image, get_modulation_graph
+from .utils import get_signals, get_signal_image, get_signal_stars
 
 
 class DemodulateInfluenceSNRFrom(forms.Form):
@@ -20,7 +20,7 @@ class DemodulateInfluenceSNRFrom(forms.Form):
         """Путь до изображения сигнального созвездия для выбранного типа модуляции"""
         modulation_bd, create = Modulation.objects.get_or_create(method=modulation)
         if not modulation_bd.stars_image:
-            content = get_modulation_graph(modem, modulation_position, modulation)
+            content = get_signal_stars(modem, modulation_position, modulation)
             modulation_bd.stars_image.save(f"{modulation}.png", content)
         return modulation_bd.stars_image.url
 
@@ -28,12 +28,13 @@ class DemodulateInfluenceSNRFrom(forms.Form):
     def calculate_percent(modem: Modem, modulation_position: int, snr: float) -> float:
         """Расчёт процента ошибочно декодированных сообщений для данного типа модуляции и SNR"""
         success_demodulate = 0
-        for i in range(1000):
+        number_checks = 1000
+        for i in range(number_checks):
             messages = get_signals(modem, modulation_position, snr)
             original_message, demodulated_message = messages[0], messages[1]
             if demodulated_message == original_message:
                 success_demodulate += 1
-        return round(100 - success_demodulate * 100 / 1000, 3)
+        return round(100 - success_demodulate * 100 / number_checks, 3)
 
     def get_context_data(self):
         snr = float(self.cleaned_data['snr'])
@@ -49,10 +50,10 @@ class DemodulateInfluenceSNRFrom(forms.Form):
         # Создание сигналов и сохранение изображений
         original_msg, demodulated_msg, modulated_signal, gaussian_signal = get_signals(modem, modulation_position, snr)
         modulated_signal_image = TemporaryImage.objects.create()
-        modulated_signal_image.image.save(f'{modulation}{modulated_signal_image.id}.png',
+        modulated_signal_image.image.save(f'modulated_{modulated_signal_image.id}.png',
                                           get_signal_image(modulated_signal))
         signal_with_gauss_image = TemporaryImage.objects.create()
-        signal_with_gauss_image.image.save(f'{modulation}{signal_with_gauss_image.id}.png',
+        signal_with_gauss_image.image.save(f'gaussian_{signal_with_gauss_image.id}.png',
                                            get_signal_image(gaussian_signal))
         # Формирование вывода о влиянии SNR на выбранный тип модуляции
         percent_errors = self.calculate_percent(modem, modulation_position, snr)

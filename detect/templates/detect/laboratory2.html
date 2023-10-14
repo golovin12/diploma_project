@@ -1,7 +1,22 @@
 {% extends "detect/base_laborathory.html" %}
 
 {% block content %}
-    <div class="card-content" id="lab2-example" style="display:block">
+    {% if request.user.lab2_is_complete %}
+        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
+            Вы успешно детектировали все 3 сигнала, можете перейти к следующей практике!
+        </div>
+    {% elif request.method == "POST" and not request.user.lab2_is_complete %}
+        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
+            У вас не удалось детектировать все сигналы, попробуйте ещё раз!
+        </div>
+    {% endif %}
+    {% if result %}
+        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
+            {{ result }}
+        </div>
+    {% endif %}
+    <div class="card-content" id="lab2-example"
+         style="display:{% if request.method == "POST" %}none{% else %}block{% endif %}">
         <p class="text-center font-weight-bold h3">Практическое задание 2 (пример выполнения)</p>
         <p class="text-center font-weight-bold h4">"Детектирование сигналов, используя сигнальное созвездие"</p>
         <div class="card-content-body">
@@ -14,12 +29,10 @@
             <p>Пример выполнения задания: </p>
             <p>Дан сигнал, который после воздействия шума и прохождения через принимающий фильтр выглядит как
                 показано на рисунке 1.</p>
-            <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.0 }}.png" alt="{{ vih_put.0 }}"/>
+            <img class="bordered-image" src="/static/detect/lab2_signal.png" alt="/static/detect/lab2_signal.png"/>
             <p class="image-caption">Рисунок 1 - Внешний вид сигнала</p>
             <p>Данный сигнал на сигнальном созвездии выглядит, как показано на рисунке 2</p>
-            <input type="hidden" name="prov3" value="{{ d.3 }}"/>
-            <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.0.0 }}.png"
-                 alt="{{ put_sozv.0.0 }}"/>
+            <img class="bordered-image" src="/static/detect/lab2_stars.png" alt="/static/detect/lab2_stars.png"/>
             <p class="image-caption">Рисунок 2 - Сигнальное созвездие</p>
             <div class="card-content-info">
                 <p>Процесс детектирования:</p>
@@ -32,8 +45,7 @@
                 <p>5) Определяем, что вторым символом является "1"</p>
                 <p>6) Определяем, какому значению соответствуют остальные символы сигнала.</p>
                 <p>После детектирования всех символов получилось сообщение: </p>
-                <input type="hidden" name="prov1" value="{{ d.1 }}"/>
-                <p style="background-color: white;">{{ d.0 }}</p>
+                <p style="background-color: white;">011010001</p>
             </div>
             <div class="text-center">
                 <a href="#" class="orange-button" onclick="collapse('lab2-example'); collapse('lab2')">
@@ -42,10 +54,9 @@
             </div>
         </div>
     </div>
-    <div class="card-content" id="lab2" style="display:none">
+    <div class="card-content" id="lab2" style="display:{% if request.method == "POST" %}block{% else %}none{% endif %}">
         <form method="POST">
             {% csrf_token %}
-            <input type="hidden" name="prov2" value="{{ d.2 }}"/>
             <p class="text-center font-weight-bold h3">Практическое задание 2</p>
             <p class="text-center font-weight-bold h4">"Детектирование сигналов, используя сигнальное созвездие"</p>
             <div class="card-content-body">
@@ -57,32 +68,28 @@
                         символов!</p>
                 </div>
                 <div>
-                    <p>1) Сигнал 1 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
-                    <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.1 }}.png" alt="{{ vih_put.1 }}"/>
-                    <p class="image-caption">Рисунок 1 - Внешний вид сигнала 1</p>
-                    <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.1.0 }}.png"
-                         alt="{{ put_sozv.1.0 }}"/>
-                    <p class="image-caption">Рисунок 2 - Сигнальное созвездие для сигнала 1</p>
-                    <p>Введите значения сигнала 1: <input autocomplete="off" required name="otv1" type="text" size="40"
-                                                          placeholder="Пример ввода: 01101000110101"/></p>
-                    <p>2) Сигнал 2 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
-                    <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.2 }}.png" alt="{{ vih_put.2 }}"/>
-                    <p class="image-caption">Рисунок 3 - Внешний вид сигнала 2</p>
-                    <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.2.0 }}.png"
-                         alt="{{ put_sozv.2.0 }}"/>
-                    <p class="image-caption">Рисунок 4 - Сигнальное созвездие для сигнала 2</p>
-                    <p>Введите значения сигнала 2: <input autocomplete="off" required name="otv2" type="text" size="40"
-                                                          placeholder="Пример ввода: 01101000110101"/></p>
-                    <p>3) Сигнал 3 после воздействия шума и пропускания через принимающий фильтр выглядит так:</p>
-                    <img class="bordered-image" src="/static/detect/lab2/{{ vih_put.3 }}.png" alt="{{ vih_put.3 }}"/>
-                    <p class="image-caption">Рисунок 5 - Внешний вид сигнала 3</p>
-                    <img class="bordered-image" src="/static/detect/lab2/{{ put_sozv.3.0 }}.png"
-                         alt="{{ put_sozv.3.0 }}"/>
-                    <p class="image-caption">Рисунок 6 - Сигнальное созвездие для сигнала 3</p>
-                    <p>Введите значения сигнала 3: <input autocomplete="off" required name="otv3" type="text" size="40"
-                                                          placeholder="Пример ввода: 01101000110101"/></p>
+                    {% for lab2 in lab2_tasks %}
+                        <p>{{ forloop.counter }}) Сигнал {{ forloop.counter }} после воздействия шума и пропускания
+                            через принимающий фильтр выглядит так:</p>
+                        <img class="bordered-image" src="{{ lab2.signal_image.url }}"
+                             alt="{{ lab2.signal_image.url }}"/>
+                        <p class="image-caption">Рисунок {{ forloop.counter }}.1 - Внешний вид
+                            сигнала {{ forloop.counter }}</p>
+                        <img class="bordered-image" src="{{ lab2.stars_image.url }}" alt="{{ lab2.stars_image.url }}"/>
+                        <p class="image-caption">Рисунок {{ forloop.counter }}.2 - Сигнальное созвездие для
+                            сигнала {{ forloop.counter }}</p>
+                        <p>Введите значение сигнала {{ forloop.counter }}:
+                            <input autocomplete="off" name="{{ lab2.modulation }}" type="text" size="40"
+                                   placeholder="Пример ввода: 01101000110101"
+                                    {% if lab2.is_complete %}
+                                   class="form-control is-valid" value="{{ lab2.signal }}" disabled
+                                    {% else %}
+                                   class="form-control" required
+                                    {% endif %}/>
+                        </p>
+                    {% endfor %}
                     <p>После того, как Вы детектируете все 3 сигнала, нажмите кнопку "Проверить".</p>
-                    <div class="text-center">
+                    <div class="text-center" style="margin-bottom: 1em">
                         <button type="submit" class="orange-button" style="width: 50%">Проверить</button>
                     </div>
                     <p>Вы можете посмотреть пример выполнения задания, нажав на кнопку ниже (все введенные значения
