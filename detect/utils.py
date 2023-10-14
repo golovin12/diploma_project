@@ -1,12 +1,10 @@
 import io
 import math, cmath
 import random
-import uuid
 
 import numpy as np
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
-from scipy.fft import fft, ifft
 
 from detect.models import Student, StudentLab2, StudentLab3, StudentLab4
 from modulation_script import Modem, PSKModem, QAMModem, OFDMModem

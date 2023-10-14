@@ -13,8 +13,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 
 from .forms import StudentForm, DemodulateInfluenceSNRFrom
 from .models import Student, StudentLab1
-from .utils import convert_base, for_test, get_lab2_tasks_by_student, get_lab3_tasks_by_student, \
-    get_lab4_by_student
+from .utils import for_test, get_lab2_tasks_by_student, get_lab3_tasks_by_student, get_lab4_by_student
 
 warnings.filterwarnings('ignore')
 
@@ -75,6 +74,71 @@ def theory3(request: WSGIRequest):
             "text": text
             }
     return render(request, 'detect/theory3.html', context=data)
+
+
+@login_required(login_url="/detect/student_login/")
+@require_GET
+def lab1_example(request: WSGIRequest):
+    return render(request, 'detect/lab1_example.html', {'form': DemodulateInfluenceSNRFrom})
+
+
+@login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
+@never_cache
+def laboratory1(request: WSGIRequest):
+    form = DemodulateInfluenceSNRFrom
+    if request.method == "POST":
+        form = form(request.POST)
+        if form.is_valid():
+            data = form.get_context_data()
+            if data['is_complete']:
+                StudentLab1.objects.get_or_create(student=request.user, modulation=data['modulation'], is_complete=True)
+            data['form'] = form
+            return render(request, 'detect/laboratory1.html', context=data)
+    return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
+
+
+@login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
+@never_cache
+def laboratory2(request: WSGIRequest):
+    lab2_tasks = get_lab2_tasks_by_student(request.user)
+    if request.method == "POST":
+        for lab2 in lab2_tasks:
+            if not lab2.is_complete and request.POST.get(lab2.modulation) == lab2.signal:
+                lab2.is_complete = True
+                lab2.save()
+    return render(request, 'detect/laboratory2.html', context={'lab2_tasks': lab2_tasks})
+
+
+@login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
+@never_cache
+def laboratory3(request: WSGIRequest):
+    lab3_tasks = get_lab3_tasks_by_student(request.user)
+    if request.method == "POST":
+        for lab3 in lab3_tasks:
+            if not lab3.is_complete and request.POST.get(f'signal-{lab3.multiplier}') == lab3.signal:
+                lab3.is_complete = True
+                lab3.save()
+    return render(request, 'detect/laboratory3.html', context={"lab3_tasks": lab3_tasks})
+
+
+@login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
+@never_cache
+def laboratory4(request: WSGIRequest):
+    lab4 = get_lab4_by_student(request.user)
+    if request.method == "POST":
+        if not lab4.is_complete and request.POST.get('signal') == lab4.signal:
+            lab4.is_complete = True
+            lab4.save()
+    return render(request, 'detect/laboratory4.html', context={"lab4": lab4})
+
+
+# Запоминает вопросы пользователя
+otveti_for_users = []
+otveti_slovar = {}
 
 
 @require_GET
@@ -146,71 +210,6 @@ def final_test(request: WSGIRequest):
         return render(request, 'detect/final_test.html',
                       context={"zagolovok": zagolovok, "voprosi": voprosi, "form": form, "result": result,
                                "id": pk})
-
-
-@login_required(login_url="/detect/student_login/")
-@require_GET
-def lab1_example(request: WSGIRequest):
-    return render(request, 'detect/lab1_example.html', {'form': DemodulateInfluenceSNRFrom})
-
-
-@login_required(login_url="/detect/student_login/")
-@require_http_methods(["POST", "GET"])
-@never_cache
-def laboratory1(request: WSGIRequest):
-    form = DemodulateInfluenceSNRFrom
-    if request.method == "POST":
-        form = form(request.POST)
-        if form.is_valid():
-            data = form.get_context_data()
-            if data['is_complete']:
-                StudentLab1.objects.get_or_create(student=request.user, modulation=data['modulation'], is_complete=True)
-            data['form'] = form
-            return render(request, 'detect/laboratory1.html', context=data)
-    return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
-
-
-@login_required(login_url="/detect/student_login/")
-@require_http_methods(["POST", "GET"])
-@never_cache
-def laboratory2(request: WSGIRequest):
-    lab2_tasks = get_lab2_tasks_by_student(request.user)
-    if request.method == "POST":
-        for lab2 in lab2_tasks:
-            if not lab2.is_complete and request.POST.get(lab2.modulation) == lab2.signal:
-                lab2.is_complete = True
-                lab2.save()
-    return render(request, 'detect/laboratory2.html', context={'lab2_tasks': lab2_tasks})
-
-
-@login_required(login_url="/detect/student_login/")
-@require_http_methods(["POST", "GET"])
-@never_cache
-def laboratory3(request: WSGIRequest):
-    lab3_tasks = get_lab3_tasks_by_student(request.user)
-    if request.method == "POST":
-        for lab3 in lab3_tasks:
-            if not lab3.is_complete and request.POST.get(f'signal-{lab3.multiplier}') == lab3.signal:
-                lab3.is_complete = True
-                lab3.save()
-    return render(request, 'detect/laboratory3.html', context={"lab3_tasks": lab3_tasks})
-
-
-@login_required(login_url="/detect/student_login/")
-@require_http_methods(["POST", "GET"])
-@never_cache
-def laboratory4(request: WSGIRequest):
-    lab4 = get_lab4_by_student(request.user)
-    if request.method == "POST":
-        if not lab4.is_complete and request.POST.get('signal') == lab4.signal:
-            lab4.is_complete = True
-            lab4.save()
-    return render(request, 'detect/laboratory4.html', context={"lab4": lab4})
-
-
-# Запоминает вопросы пользователя
-otveti_for_users = []
-otveti_slovar = {}
 
 
 def znach(voprosi, otveti):
