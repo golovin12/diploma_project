@@ -3,16 +3,11 @@
 {% block content %}
     {% if request.user.lab2_is_complete %}
         <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
-            Вы успешно детектировали все 3 сигнала, можете перейти к следующей практике!
+            Вы успешно детектировали все 3 сигнала. Зафиксируйте результат и можете перейти к следующей практике!
         </div>
     {% elif request.method == "POST" and not request.user.lab2_is_complete %}
         <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
             У вас не удалось детектировать все сигналы, попробуйте ещё раз!
-        </div>
-    {% endif %}
-    {% if result %}
-        <div class="card-content-info" style="text-transform: uppercase; text-align: center; font-weight: 600;">
-            {{ result }}
         </div>
     {% endif %}
     <div class="card-content" id="lab2-example"

@@ -1,14 +1,11 @@
 import uuid
 
-from commpy import awgn
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from modulation_script import PSKModem, QAMModem
 from .consts import modulation_choices
-from .utils import get_random_message, get_signal_stars, get_signal_image
 
 signal_validator = RegexValidator(r'^[0,1]*$')
 
@@ -105,34 +102,13 @@ class StudentLab2(models.Model):
     is_complete = models.BooleanField(default=False, verbose_name='Детектирован',
                                       help_text='Становится True если сигнал детектирован')
 
-    def create_task(self):
-        modulation = self.modulation
-        modulation_position, modulation_type = modulation.split('-')
-        modulation_position = int(modulation_position)
-        # Инициализация модема
-        if modulation_type == "PSK":
-            modem = PSKModem(modulation_position)
-        else:
-            modem = QAMModem(modulation_position)
-        if modulation_position >= 16:
-            snr = 21
-        else:
-            snr = 15
-        message = get_random_message(modulation_position)
-        signal_with_gaussian = awgn(modem.modulate(message), snr)
-        self.signal = ''.join(str(i) for i in modem.demodulate(signal_with_gaussian, "hard"))
-        signal_image = get_signal_image(signal_with_gaussian)
-        self.signal_image.save(f'signal_{self.id}.png', signal_image)
-        stars_image = get_signal_stars(modem, modulation_position, modulation, signal_with_gaussian)
-        self.stars_image.save(f'stars_{self.id}.png', stars_image)
-        self.save()
-
 
 class StudentLab3(models.Model):
     student = models.ForeignKey(Student, verbose_name='Студент', on_delete=models.CASCADE)
-    signal = models.CharField(verbose_name='Сигнал', max_length=80, validators=[signal_validator])
-    signal_complex = models.CharField(verbose_name='Сигнал в виде комплексных чисел', max_length=3000)
-    is_complete = models.BooleanField(default=False, verbose_name='Детектирован',
+    multiplier = models.PositiveIntegerField('Множитель длины сигнала', default=1)
+    signal = models.CharField('Сигнал', max_length=48, validators=[signal_validator], default='')
+    signal_complex = models.CharField('Сигнал в виде комплексных чисел', max_length=3000)
+    is_complete = models.BooleanField('Детектирован', default=False,
                                       help_text='Становится True если сигнал детектирован')
 
 

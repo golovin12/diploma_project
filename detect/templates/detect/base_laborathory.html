@@ -13,6 +13,17 @@
             loader.classList.add('enabled')
             collapse('loader-bg')
         }
+
+        function copyText(elementId) {
+            // Get the text field
+            let element = document.getElementById(elementId);
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(element.text);
+
+            // Alert the copied text
+            alert("Copied the text: " + element.text);
+        }
     </script>
 {% endblock %}
 

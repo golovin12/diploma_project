@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from commpy.channels import awgn
 
-from modulation_script import Modem
+from detect.models import Student, StudentLab2, StudentLab3
+from modulation_script import Modem, PSKModem, QAMModem
 
 
 def convert_base(num, to_base=2, from_base=2):
@@ -113,6 +114,12 @@ def get_signals(modem: Modem, modulation_position: int,
     return original_message, demodulated_message, modulated_signal, gaussian_signal
 
 
+def get_modem_by_modulation(modulation_type: str, modulation_position: int) -> Modem:
+    if modulation_type == "PSK":
+        return PSKModem(modulation_position)
+    return QAMModem(modulation_position)
+
+
 def get_signal_image(signal: np.ndarray[np.complex_]) -> io.BytesIO:
     """Построение графиков сигналов"""
     fig, ax = plt.subplots()
@@ -135,3 +142,37 @@ def get_signal_image(signal: np.ndarray[np.complex_]) -> io.BytesIO:
     plt.savefig(buf, format='png')
     plt.close()
     return buf
+
+
+def get_lab2_tasks_by_student(student: Student) -> list[StudentLab2]:
+    lab2_tasks = []
+    for modulation in ('4-PSK', '4-QAM', '16-QAM'):  # todo заменить на константы
+        lab2, create = StudentLab2.objects.get_or_create(student=student, modulation=modulation)
+        if not lab2.signal:
+            modulation_position, modulation_type = modulation.split('-')
+            modulation_position = int(modulation_position)
+            modem = get_modem_by_modulation(modulation_type, modulation_position)
+            message = get_random_message(modulation_position)
+            signal_with_gaussian = awgn(modem.modulate(message), modulation_position + 11)
+            lab2.signal = ''.join(str(i) for i in modem.demodulate(signal_with_gaussian, "hard"))
+            signal_image = get_signal_image(signal_with_gaussian)
+            lab2.signal_image.save(f'signal_{lab2.id}.png', signal_image)
+            stars_image = get_signal_stars(modem, modulation_position, modulation, signal_with_gaussian)
+            lab2.stars_image.save(f'stars_{lab2.id}.png', stars_image)
+            lab2.save()
+        lab2_tasks.append(lab2)
+    return lab2_tasks
+
+
+def get_lab3_tasks_by_student(student: Student) -> list[StudentLab3]:
+    lab3_tasks = []
+    modem = get_modem_by_modulation('PSK', 4)
+    for multiplier in (1, 2, 3):
+        lab3, create = StudentLab3.objects.get_or_create(student=student, multiplier=multiplier)
+        if not lab3.signal:
+            message = get_random_message(4 * multiplier)
+            lab3.signal = ''.join(str(i) for i in message)
+            lab3.signal_complex = [i for i in awgn(modem.modulate(message), 20)]
+            lab3.save()
+        lab3_tasks.append(lab3)
+    return lab3_tasks

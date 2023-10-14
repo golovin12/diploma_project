@@ -16,10 +16,11 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 
-from modulation_script import PSKModem
+from modulation_script import PSKModem, QAMModem
 from .forms import StudentForm, DemodulateInfluenceSNRFrom
-from .models import Student, StudentLab1, StudentLab2
-from .utils import convert_base, for_test
+from .models import Student, StudentLab1, StudentLab2, StudentLab3
+from .utils import convert_base, for_test, get_random_message, get_signal_image, get_signal_stars, \
+    get_modem_by_modulation, get_lab2_tasks_by_student, get_lab3_tasks_by_student
 
 warnings.filterwarnings('ignore')
 
@@ -167,24 +168,19 @@ def laboratory1(request: WSGIRequest):
     if request.method == "POST":
         form = form(request.POST)
         if form.is_valid():
-            student = request.user
             data = form.get_context_data()
             if data['is_complete']:
-                StudentLab1.objects.get_or_create(student=student, modulation=data['modulation'], is_complete=True)
+                StudentLab1.objects.get_or_create(student=request.user, modulation=data['modulation'], is_complete=True)
             data['form'] = form
             return render(request, 'detect/laboratory1.html', context=data)
     return render(request, 'detect/lab1_example.html', context={"form": form, 'hide_example': True})
 
 
 @login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory2(request: WSGIRequest):
-    lab2_tasks = []
-    for modulation in ('4-PSK', '4-QAM', '16-QAM'):  # todo заменить на константы
-        lab2, create = StudentLab2.objects.get_or_create(student=request.user, modulation=modulation)
-        if not lab2.signal:
-            lab2.create_task()
-        lab2_tasks.append(lab2)
+    lab2_tasks = get_lab2_tasks_by_student(request.user)
     if request.method == "POST":
         for lab2 in lab2_tasks:
             if not lab2.is_complete and request.POST.get(lab2.modulation) == lab2.signal:
@@ -194,69 +190,20 @@ def laboratory2(request: WSGIRequest):
 
 
 @login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory3(request: WSGIRequest):
-    # Для каждого студента генерируем свой набор сигналов и работаем только с ним.
-    # Пример выносим из бэка
+    lab3_tasks = get_lab3_tasks_by_student(request.user)
     if request.method == "POST":
-        mess1 = convert_base(request.POST.get("mess1"), 2, 21)
-        mess1 = mess1[::-1][7:][:-6]
-        mess2 = convert_base(request.POST.get("mess2"), 2, 24)
-        mess2 = mess2[::-1][7:][:-6]
-        mess3 = convert_base(request.POST.get("mess3"), 2, 22)
-        mess3 = mess3[::-1][7:][:-6]
-        otv1 = request.POST.get("otv1")
-        otv2 = request.POST.get("otv2")
-        otv3 = request.POST.get("otv3")
-        c = 0
-        for i in [mess1, mess2, mess3]:
-            if i in [otv1, otv2, otv3]:
-                c += 1
-        if c == 3:
-            result = "Вы успешно справились с заданием 3. Покажите результат преподавателю!"
-        else:
-            result = "Вы не справились с заданием, попробуйте ещё раз! Вы правильно детектировали {} сигналов.".format(
-                c)
-        return render(request, 'detect/result.html', context={"result": result})
-    else:
-        # Формирование 3 сигналов для проверки детектора.
-        modem = PSKModem(4)
-        c = 1
-        mess = []
-        for i in range(3):
-            d = ""
-            c = c * 2
-            for k in range(c * 10):
-                d += random.choice(["0", "1"])
-            a = ""
-            b = ""
-            for o in range(5):
-                a += random.choice(["0", "1"])
-            for o in range(6):
-                b += random.choice(["0", "1"])
-            d = "1" + a + d[::-1] + b + "1"
-            mess.append(d)
-        for_modulat = []
-        for i in mess:
-            pok = i[::-1][7:][:-6]
-            vih = []
-            for k in pok:
-                vih.append(int(k))
-            for_modulat.append(vih)
-        spisok = []
-        for i in for_modulat:
-            c = awgn(modem.modulate(i), 20)
-            otpr = []
-            for l in c:
-                otpr.append(l)
-            spisok.append(otpr)
-        mess[0] = convert_base(mess[0], 21, 2)
-        mess[1] = convert_base(mess[1], 24, 2)
-        mess[2] = convert_base(mess[2], 22, 2)
-        return render(request, 'detect/laboratory3.html', context={"spisok": spisok, "mess": mess})
+        for lab3 in lab3_tasks:
+            if not lab3.is_complete and request.POST.get(f'signal-{lab3.multiplier}') == lab3.signal:
+                lab3.is_complete = True
+                lab3.save()
+    return render(request, 'detect/laboratory3.html', context={"lab3_tasks": lab3_tasks})
 
 
 @login_required(login_url="/detect/student_login/")
+@require_http_methods(["POST", "GET"])
 @never_cache
 def laboratory4(request: WSGIRequest):
     # Для каждого студента генерируем свой сигнал и работаем только с ним.

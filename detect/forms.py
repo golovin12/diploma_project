@@ -1,9 +1,9 @@
 from django import forms
 
-from modulation_script import QAMModem, PSKModem, Modem
+from modulation_script import Modem
 from .consts import modulation_choices
 from .models import Student, Modulation, TemporaryImage
-from .utils import get_signals, get_signal_image, get_signal_stars
+from .utils import get_signals, get_signal_image, get_signal_stars, get_modem_by_modulation
 
 
 class DemodulateInfluenceSNRFrom(forms.Form):
@@ -41,12 +41,7 @@ class DemodulateInfluenceSNRFrom(forms.Form):
         modulation = self.cleaned_data['modulation']
         modulation_position, modulation_type = modulation.split('-')
         modulation_position = int(modulation_position)
-        # Инициализация модема
-        if modulation_type == "PSK":
-            modem = PSKModem(modulation_position)
-        else:
-            modem = QAMModem(modulation_position)
-
+        modem = get_modem_by_modulation(modulation_type, modulation_position)
         # Создание сигналов и сохранение изображений
         original_msg, demodulated_msg, modulated_signal, gaussian_signal = get_signals(modem, modulation_position, snr)
         modulated_signal_image = TemporaryImage.objects.create()
@@ -61,7 +56,6 @@ class DemodulateInfluenceSNRFrom(forms.Form):
             is_complete = True
         else:
             is_complete = False
-
         return {'original_message': original_msg,
                 'demodulated_message': demodulated_msg,
                 'path_to_modulated_signal': modulated_signal_image.image.url,
